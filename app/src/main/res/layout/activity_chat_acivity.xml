@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/RL"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+    <LinearLayout
+        android:id="@+id/LL"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_marginTop="5dp"
+            android:background="@android:drawable/ic_delete"
+            android:id="@+id/Back"
+            android:layout_marginLeft="5dp"
+            app:cornerRadius="0dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp">
+        </Button>
+    </LinearLayout>
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_below="@+id/LL"
+        android:layout_marginBottom="60dp"
+        android:id="@+id/MESSAGES"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent">
+    </androidx.recyclerview.widget.RecyclerView>
+    <EditText
+        android:layout_marginBottom="5dp"
+        android:id="@+id/editText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/button"
+        android:hint="Введите ваше сообщение">
+    </EditText>
+    <Button android:layout_marginBottom="3dp"
+        android:layout_alignBottom="@+id/MESSAGES"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="Отправить">
+    </Button>
+</RelativeLayout>

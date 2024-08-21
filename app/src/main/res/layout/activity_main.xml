@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android" />
+
+<!--    <LinearLayout-->
+<!--        android:gravity="left"-->
+<!--        android:orientation="vertical"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="50dp">-->
+<!--        <ImageView-->
+<!--            android:id="@+id/toolbar"-->
+<!--            android:layout_marginTop="5dp"-->
+<!--            android:background="@drawable/ic_three_rows"-->
+<!--            android:layout_marginLeft="5dp"-->
+<!--            app:cornerRadius="0dp"-->
+<!--            android:layout_width="40dp"-->
+<!--            android:layout_height="40dp">-->
+<!--        </ImageView>-->
+
+<!--    </LinearLayout>-->
+<!--    <androidx.recyclerview.widget.RecyclerView-->
+<!--        android:id="@+id/Scroll"-->
+<!--        android:layout_marginBottom="70dp"-->
+<!--        android:layout_marginTop="50dp"-->
+<!--        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="fill_parent"/>-->
+
+<!--    <LinearLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="70dp"-->
+<!--        android:gravity="center"-->
+<!--        android:orientation="vertical"-->
+<!--        android:layout_alignParentBottom="true">-->
+<!--        <Button-->
+<!--            android:text="Отправить сообщение всем"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content">-->
+
+<!--        </Button>-->
+<!--    </LinearLayout>-->
+
+
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    xmlns:tools="http://schemas.android.com/tools"-->
+<!--    android:id="@+id/main"-->
+<!--    android:orientation="vertical"-->
+<!--    android:gravity="center"-->
+<!--    android:layout_width="match_parent"-->
+<!--    android:layout_height="match_parent"-->
+<!--    tools:context=".MainActivity">-->
+<!--    <EditText-->
+
+<!--        android:id="@+id/RESPONSE"-->
+<!--        android:layout_width="100dp"-->
+<!--        android:layout_height="wrap_content">-->
+
+<!--    </EditText>-->
+<!--    <Button-->
+<!--        android:text="SEND"-->
+<!--        android:id="@+id/Enter"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"></Button>-->
+<!--    <TextView-->
+<!--        android:gravity="center"-->
+<!--        android:textAlignment="center"-->
+<!--        android:textSize="16sp"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        android:id="@+id/Receive"-->
+<!--        android:text="RECEIVE"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="50dp"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+<!--</LinearLayout>-->
