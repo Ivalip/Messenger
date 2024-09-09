@@ -2,4 +2,17 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="primary_l">#466731</color>
+    <color name="primary_d">#193706</color>
+    <color name="secondary_l">#F8FAF0</color>
+    <color name="secondary_d">#11140E</color>
+    <color name="chat_l">#F3F5EA</color>
+    <color name="chat_d">#191D16</color>
+    <color name="message_1_l">#C6EEA9</color>
+    <color name="message_2_l">#EDEFE4</color>
+    <color name="message_1_d">#2F4F1B</color>
+    <color name="message_2_d">#1D211A</color>
 </resources>
+
+
+

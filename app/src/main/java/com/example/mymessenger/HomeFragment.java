@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.view.menu.MenuPopupHelper;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
@@ -62,13 +64,15 @@ public class HomeFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-    ImageView toolbar;
+    AppCompatButton toolbar;
+    ImageView addUserBtn;
     Button butSendForAll;
     RecyclerViewAdapter adapter;
     public List<ChatMessage> chatMessages = new ArrayList<>();
     String[] data = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
     ViewModel viewModel;
     RecyclerView recyclerView;
+    DialogFragment addUserDialog;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,10 +94,16 @@ public class HomeFragment extends Fragment {
         butSendForAll = view.findViewById(R.id.btnForAllSend);
         recyclerView = view.findViewById(R.id.Scroll);
         toolbar = view.findViewById(R.id.toolbar);
+        addUserBtn = view.findViewById(R.id.AddChatBtn);
+
         adapter = new RecyclerViewAdapter(data);
         recyclerView.setAdapter(adapter);
+
+        addUserDialog = new AddUserDialog();
+
         viewModel = new ViewModel();
         viewModel.create(getContext());
+
         @SuppressLint("RestrictedApi")
         MenuBuilder menuBuilder = new MenuBuilder(getContext());
         MenuInflater menuInflater = new MenuInflater(getContext());
@@ -135,6 +145,12 @@ public class HomeFragment extends Fragment {
             public void onClick(View v) {
                 Intent intentForAllSend = new Intent(getContext(), ChatActivity.class);
                 startActivity(intentForAllSend);
+            }
+        });
+        addUserBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addUserDialog.show(getFragmentManager(), "adduser_fragment");
             }
         });
         super.onViewCreated(view, savedInstanceState);

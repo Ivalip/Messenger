@@ -16,8 +16,6 @@ public class MainActivity extends AppCompatActivity {
     Intent mServiceIntent;
     private NotificationService notificationService;
 
-    public MainActivity() {
-    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         }
         startService(new Intent(this, NotificationService.class));
     }
+
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -59,10 +58,8 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-
     @Override
     protected void onDestroy() {
-        //stopService(mServiceIntent);
         Intent broadcastIntent = new Intent();
         broadcastIntent.setAction("restartservice");
         broadcastIntent.setClass(this, Restarter.class);

@@ -8,36 +8,52 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
     <LinearLayout
         android:gravity="left"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="50dp">
-        <ImageView
+        android:layout_height="100dp"
+        android:background="@color/primary_l"
+        android:elevation="4dp">
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/toolbar"
-            android:layout_marginTop="5dp"
-            android:background="@drawable/ic_three_rows"
-            android:layout_marginLeft="5dp"
-            app:cornerRadius="0dp"
-            android:layout_width="40dp"
-            android:layout_height="40dp">
-        </ImageView>
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="30dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="5dp"
+            android:drawableStart="@drawable/settings_icon"
+            android:background="@drawable/settings_button">
+        </androidx.appcompat.widget.AppCompatButton>
         <ImageView
-            android:id="@+id/AddChatBtn"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="-40dp"
-            android:layout_gravity="right"
-            android:background="@android:drawable/ic_input_add"
-            android:layout_width="40dp"
-            android:layout_height="40dp">
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
+            android:layout_width="100dp"
+            android:layout_height="70dp"
+            android:background="@drawable/shrooms1">
         </ImageView>
+
     </LinearLayout>
+    <ImageButton
+        android:id="@+id/AddChatBtn"
+        android:layout_marginEnd="30dp"
+        android:elevation="8dp"
+        android:layout_gravity="end|center_vertical"
+        android:background="@android:drawable/ic_input_add"
+        android:layout_width="40dp"
+        android:layout_height="40dp">
+    </ImageButton>
+</FrameLayout>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/Scroll"
         android:layout_marginBottom="70dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="100dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:layout_width="match_parent"
+        android:background="@color/secondary_l"
         android:layout_height="fill_parent"/>
 
     <LinearLayout
@@ -45,14 +61,16 @@
         android:layout_height="70dp"
         android:gravity="center"
         android:orientation="vertical"
+        android:background="@color/primary_l"
         android:layout_alignParentBottom="true">
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnForAllSend"
-            android:text="Отправить сообщение всем"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-        </Button>
+            android:text="Общий чат"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="gravity"
+            android:background="@drawable/chat_item">
+        </androidx.appcompat.widget.AppCompatButton>
     </LinearLayout>
 
 </RelativeLayout>

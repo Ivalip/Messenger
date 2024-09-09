@@ -27,7 +27,7 @@ public class NotificationService extends Service {
     public void onCreate() {
         super.onCreate();
         startMyOwnForeground();
-        notificationManagerCompat = NotificationManagerCompat.from(this);;
+        notificationManagerCompat = NotificationManagerCompat.from(this);
         createNotificationChannel();
     }
 

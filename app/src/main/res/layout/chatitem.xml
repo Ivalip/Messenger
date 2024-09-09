@@ -2,14 +2,71 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="50dp"
-    android:layout_marginTop="10dp">
-    <TextView
+    android:layout_height="100dp"
+    android:layout_marginTop="15dp"
+    android:layout_marginLeft="20dp"
+    android:layout_marginRight="20dp">
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/NumberChat"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/chat_item"
+        android:elevation="0dp">
+    </androidx.appcompat.widget.AppCompatButton>
+    <TextView
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        android:layout_gravity="top|center_horizontal"
-        android:textSize="24sp">
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"
+        android:textStyle="bold|normal"
+        android:text="Chat"
+        android:elevation="7dp">
     </TextView>
+    <TextView
+        android:id="@+id/message_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="70dp"
+        android:text="00:00"
+        android:elevation="7dp">
+    </TextView>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:layout_marginStart="40dp"
+        android:orientation="horizontal"
+        android:elevation="7dp">
+        <TextView
+            android:id="@+id/last_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:text="Message sample">
+        </TextView>
+        <ImageView
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/brown_check">
+        </ImageView>
+    </LinearLayout>
+
+
+<!--    <TextView-->
+<!--        android:id="@+id/NumberChat"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="8dp"-->
+<!--        android:layout_marginLeft="20dp"-->
+<!--        android:background="@drawable/chat_item"-->
+<!--        android:text="TextView"-->
+<!--        android:textSize="24sp">-->
+<!--    </TextView>-->
+
 </FrameLayout>
