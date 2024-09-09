@@ -24,7 +24,7 @@
             android:layout_marginTop="40dp"
             android:orientation="horizontal">
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/Back"
+                android:id="@+id/BackBtn"
                 android:drawableStart="@drawable/arrow_back"
                 android:padding="8dp"
                 android:background="@android:color/transparent"

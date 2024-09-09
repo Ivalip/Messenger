@@ -71,12 +71,6 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
                 removeAt(position);
             }
         });
-        if (chatMessages.get(position).sender == "0") {
-            holder.itemView.setBackgroundColor(Color.parseColor("#808080"));
-        }
-        else {
-            holder.itemView.setBackgroundColor(Color.parseColor("#008000"));
-        }
     }
     public void removeAt(int position) {
         chatMessages.remove(position);

@@ -12,8 +12,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,14 +35,14 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
     ChatRecyclerViewAdapter adapter;
     private boolean connected = false;
     private SerialInputOutputManager usbIoManager;
-    Button edit;
+    ImageButton edit;
     EditText text;
     RecyclerView recyclerView;
     String message = "";
     UsbSerialPort usbSerialPort;
     BroadcastReceiver broadcastReceiver;
     Handler mainLooper;
-    Button backBut;
+    AppCompatButton backBut;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +53,7 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
         recyclerView = findViewById(R.id.MESSAGES);
         edit = findViewById(R.id.button);
         text = findViewById(R.id.editText);
-        backBut = findViewById(R.id.Back);
+        backBut = findViewById(R.id.BackBtn);
 
         backBut.setOnClickListener(new View.OnClickListener() {
             @Override
