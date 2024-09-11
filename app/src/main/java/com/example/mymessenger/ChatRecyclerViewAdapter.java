@@ -1,11 +1,14 @@
 package com.example.mymessenger;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -18,12 +21,17 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     public static final int VIEW_TYPE_SENT = 0;
     public static final int VIEW_TYPE_RECEIVE = 1;
     private Context context;
+    String MyUuid;
     ViewModel viewModel = new ViewModel();
     private LayoutInflater mInflater;
     private List<ChatMessage> chatMessages = new ArrayList<>();
     @Override
     public int getItemViewType (int position) {
-        if (chatMessages.get(position).sender == "0") {
+        SharedPreferences sharedPref = context.getSharedPreferences("mysettings", Context.MODE_PRIVATE);
+        MyUuid = sharedPref.getString("uuid_key", "");
+        Log.d("UUID_M", chatMessages.get(position).sender);
+        Log.d("MyUuid", MyUuid);
+        if (chatMessages.get(position).sender.equals(MyUuid)) {
             return VIEW_TYPE_SENT;
         }
         else {
@@ -46,21 +54,25 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     @Override
     public NewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         context = parent.getContext();
+        Log.d("ViewType", viewType+"");
         View view;
         if (viewType == VIEW_TYPE_SENT) {
             this.mInflater = LayoutInflater.from(parent.getContext());
-            view = mInflater.inflate(R.layout.chat_sent_item, parent, false);
+            view = mInflater.inflate(R.layout.message_item_1, parent, false);
             return new NewViewHolder(view);
         }
         else {
             this.mInflater = LayoutInflater.from(parent.getContext());
-            view = mInflater.inflate(R.layout.chat_receive_item, parent, false);
+            view = mInflater.inflate(R.layout.message_item_2, parent, false);
             return new NewViewHolder(view);
         }
     }
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         final NewViewHolder viewHolder = (NewViewHolder) holder;
+
+        int type = getItemViewType(position);
+
         viewHolder.content.setText(chatMessages.get(position).content);
         String tm = chatMessages.get(position).time;
         viewHolder.time.setText(tm.substring(tm.indexOf(":") + 1, tm.length()-3));

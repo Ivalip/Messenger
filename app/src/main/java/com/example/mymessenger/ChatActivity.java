@@ -3,6 +3,7 @@ package com.example.mymessenger;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -28,6 +30,7 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ChatActivity extends AppCompatActivity implements SerialInputOutputManager.Listener {
     String numberOfChat;
@@ -43,6 +46,7 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
     BroadcastReceiver broadcastReceiver;
     Handler mainLooper;
     AppCompatButton backBut;
+    String MyUuid;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +58,9 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
         edit = findViewById(R.id.button);
         text = findViewById(R.id.editText);
         backBut = findViewById(R.id.BackBtn);
+        SharedPreferences sharedPref = getSharedPreferences("mysettings", Context.MODE_PRIVATE);
+        MyUuid = sharedPref.getString("uuid_key", "");
+        Log.d("UUID_c", MyUuid);
 
         backBut.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,7 +156,7 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
 
                         viewModel.insert(new ChatMessage(text.getText().toString(),
                                 formater(System.currentTimeMillis() + ""),
-                                "0", numberOfChat));
+                                MyUuid, numberOfChat));
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -175,9 +182,10 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
         }
         if (message.contains("<END>")) {
             String time = message.substring(message.indexOf("<TIME>") + 6, message.length() - 5);
-            Long id = Long.parseLong(message.substring(message.indexOf("<ID>") + 4, message.indexOf("<START>")));
+            Long ReceiverID = Long.parseLong(message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>")));
+            Long SenderID = Long.parseLong(message.substring(message.indexOf("<SenderID>") + 10, message.indexOf("<START>")));
             String text = message.substring(message.indexOf("<START>") + 7, message.indexOf("<TIME>"));
-            viewModel.insert(new ChatMessage(text, formater(time), "1","0"));
+            viewModel.insert(new ChatMessage(text, formater(time), SenderID.toString(),"0"));
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -188,7 +196,7 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
         }
     }
     public void writeMessage (String msg) throws IOException {
-        msg = "<ID>" + numberOfChat + "<START>" + msg + "<TIME>" + System.currentTimeMillis() + "<END>";
+        msg = "<ReceiverID>" + numberOfChat + "<SenderID>" + MyUuid + "<START>" + msg + "<TIME>" + System.currentTimeMillis() + "<END>";
         usbSerialPort.write(msg.getBytes(), 2000);
     }
 
