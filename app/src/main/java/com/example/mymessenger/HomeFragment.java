@@ -95,14 +95,12 @@ public class HomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.Scroll);
         toolbar = view.findViewById(R.id.toolbar);
         addUserBtn = view.findViewById(R.id.AddChatBtn);
-
-        adapter = new RecyclerViewAdapter(data);
+        viewModel = new ViewModel();
+        viewModel.create(getContext());
+        adapter = new RecyclerViewAdapter(data, viewModel, getActivity());
         recyclerView.setAdapter(adapter);
 
         addUserDialog = new AddUserDialog();
-
-        viewModel = new ViewModel();
-        viewModel.create(getContext());
 
         @SuppressLint("RestrictedApi")
         MenuBuilder menuBuilder = new MenuBuilder(getContext());
