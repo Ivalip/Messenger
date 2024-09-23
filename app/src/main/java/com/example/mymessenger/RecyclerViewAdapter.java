@@ -19,16 +19,24 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mymessenger.Database.Entity.ChatMessage;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder>{
 
     ViewModel viewModel;
+    String lastMessage;
+    List<ChatMessage> lastMessages;
     private String[] mData;
     private LayoutInflater mInflater;
     Context context;
     FragmentActivity fragmentActivity;
+
+    public void newAddedData(List <ChatMessage> lastMessages){
+        this.lastMessages = lastMessages;
+        notifyDataSetChanged();
+    }
 
     RecyclerViewAdapter(String[] data, ViewModel viewModel, FragmentActivity activity) {
         this.mData = data;
@@ -45,29 +53,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) { // 0, 1, 2
-        viewModel.createByID(context, position + "");
-        List<ChatMessage> messageList = new ArrayList<>();
-        //Observing our LiveData for showing it in recyclerView.
-        viewModel.mutableLiveData.observe(fragmentActivity, (Observer<? super List<ChatMessage>>)
-                            new Observer<List<ChatMessage>>() {
-                        @Override
-                        public void onChanged(List<ChatMessage> messages) {
-                        Log.d("NEW_MESSAGE", " ArrayList: " + messageList);
-                        if (messages.size() == 0) {
-                            Log.d("EMPTY MESSAGES", "Empty list of messages");
-                        } else {
-                            messageList.clear();
-                            for (int i = 0; i < messages.size(); i++) {
-                                messageList.add(messages.get(i));
-                            }
-                            Log.d("LAST_MESSAGE", "Message: " + messages.get(messages.size() - 1).content + " Position: " + position);
-                            holder.lastMessage.setText(messages.get(messages.size() - 1).content);
-                            String time = messages.get(messages.size() - 1).time;
-                            holder.timeView.setText(time.substring(time.indexOf(":")+1, time.indexOf(":")+6));
-                        }
-                    }
-                });
         holder.title.setText(mData[position]+ " channel");
+        try {
+            holder.lastMessage.setText(lastMessages.get(position+1).content);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
         holder.myTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

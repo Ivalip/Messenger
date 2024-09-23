@@ -12,8 +12,10 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -96,11 +98,32 @@ public class HomeFragment extends Fragment {
         toolbar = view.findViewById(R.id.toolbar);
         addUserBtn = view.findViewById(R.id.AddChatBtn);
         viewModel = new ViewModel();
-        viewModel.create(getContext());
+        viewModel.create_for_last(getContext());
         adapter = new RecyclerViewAdapter(data, viewModel, getActivity());
         recyclerView.setAdapter(adapter);
 
         addUserDialog = new AddUserDialog();
+
+        viewModel.getLast().observe(getViewLifecycleOwner(), (Observer<? super List<ChatMessage>>)
+                new Observer<List<ChatMessage>>() {
+                    @Override
+                    public void onChanged(List<ChatMessage> messages) {
+                        Log.d("NEW_MESSAGE", " ArrayList: " + messages);
+                        if (messages.size() == 0) {
+                            Log.d("EMPTY MESSAGES", "Empty list of messages");
+                        } else {
+                            adapter.newAddedData(messages);
+//                            messageList.clear();
+//                            for (int i = 0; i < messages.size(); i++) {
+//                                messageList.add(messages.get(i));
+//                            }
+                            for(int i = 0; i < messages.size(); ++i){
+                                Log.d("LAST_MESSAGE", "Message: " + messages.get(i).content + " Position: " + i);
+
+                            }
+                        }
+                    }
+                });
 
         @SuppressLint("RestrictedApi")
         MenuBuilder menuBuilder = new MenuBuilder(getContext());

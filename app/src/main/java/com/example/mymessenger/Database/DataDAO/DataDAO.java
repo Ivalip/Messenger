@@ -1,5 +1,7 @@
 package com.example.mymessenger.Database.DataDAO;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -17,6 +19,9 @@ import java.util.List;
 public interface DataDAO {
     @Query("SELECT * FROM messages")
     List<ChatMessage> getAll();
+
+    @Query("SELECT *, MAX(time) FROM messages GROUP BY receiver")
+    LiveData<List<ChatMessage>> getLast();
 
     @Query("SELECT * FROM messages WHERE receiver = :receiver ORDER BY time ASC")
     @TypeConverters({AllConverter.class})

@@ -4,6 +4,9 @@ import android.content.Context;
 import android.util.Log;
 
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.example.mymessenger.Database.DataDAO.DataDAO;
 import com.example.mymessenger.Database.Entity.ChatMessage;
 import java.util.List;
@@ -19,6 +22,7 @@ public class Repository {
     public List<ChatMessage> getAll() {
         return dataDAO.getAll();
     }
+    public LiveData<List<ChatMessage>> getLast() {return  dataDAO.getLast();}
     public List<ChatMessage> getById(String receiver) {
         Log.d("POLUCHENIYE PO ID", "NE POLUCHIL");
         return dataDAO.getById(receiver);
