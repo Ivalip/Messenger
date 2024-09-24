@@ -27,6 +27,8 @@ public interface DataDAO {
     @TypeConverters({AllConverter.class})
     List <ChatMessage> getById(String receiver);
 
+    @Query("UPDATE messages SET status = true WHERE sender ")
+
     @Insert
     void insert(ChatMessage message);
 

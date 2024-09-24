@@ -2,25 +2,21 @@ package com.example.mymessenger;
 
 import static androidx.core.content.ContextCompat.startActivity;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mymessenger.Database.Entity.ChatMessage;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder>{
@@ -54,11 +50,21 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) { // 0, 1, 2
         holder.title.setText(mData[position]+ " channel");
+        ChatMessage lastMessage = lastMessages.get(position+1);
         try {
-            holder.lastMessage.setText(lastMessages.get(position+1).content);
+            holder.lastMessageView.setText(lastMessage.content);
+            Log.d("MESSAGE_TIME", "TIME: " + lastMessage.time);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+        try{
+            holder.timeView.setText(DataFormater.bd_formater(lastMessage.time));
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        if(lastMessage.isRead) { holder.statusView.setBackgroundResource(R.drawable.grey_check); }
+        else { holder.statusView.setBackgroundResource(R.drawable.brown_check); }
         holder.myTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,14 +82,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView title;
         TextView myTextView;
-        TextView lastMessage;
+        TextView lastMessageView;
         TextView timeView;
+        ImageView statusView;
         MyViewHolder(View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.title);
-            lastMessage = itemView.findViewById(R.id.last_message);
+            lastMessageView = itemView.findViewById(R.id.last_message);
             myTextView = itemView.findViewById(R.id.NumberChat);
             timeView = itemView.findViewById(R.id.message_time);
+            statusView = itemView.findViewById(R.id.status);
         }
     }
 

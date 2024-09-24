@@ -155,8 +155,8 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
                         }
 
                         viewModel.insert(new ChatMessage(text.getText().toString(),
-                                formater(System.currentTimeMillis() + ""),
-                                MyUuid, numberOfChat));
+                                DataFormater.formater(System.currentTimeMillis() + ""),
+                                MyUuid, numberOfChat, "USER"));
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
@@ -185,7 +185,7 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
             Long ReceiverID = Long.parseLong(message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>")));
             Long SenderID = Long.parseLong(message.substring(message.indexOf("<SenderID>") + 10, message.indexOf("<START>")));
             String text = message.substring(message.indexOf("<START>") + 7, message.indexOf("<TIME>"));
-            viewModel.insert(new ChatMessage(text, formater(time), SenderID.toString(),"0"));
+            viewModel.insert(new ChatMessage(text, DataFormater.formater(time), SenderID.toString(),"0", "USER"));
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -205,17 +205,6 @@ public class ChatActivity extends AppCompatActivity implements SerialInputOutput
 
     }
 
-    public String formater(String time) {
-        Long inttime = Long.parseLong(time);
-        inttime = inttime / 1000;
-        long seconds = inttime % 60;
-        inttime = inttime / 60;
-        long day = inttime / 1440;
-        long hour = (inttime  % 1440) / 60;
-        long minutes = (inttime % 1440) % 60;
-        return day + ":" + String.format("%2s", hour).replace(' ', '0') + ":" +
-                String.format("%2s", minutes).replace(' ', '0') + ":" +
-                String.format("%2s", seconds).replace(' ', '0');
-    }
+
 
 }

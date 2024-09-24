@@ -15,15 +15,22 @@ public class ChatMessage {
     public String sender;
     @ColumnInfo(name = "receiver")
     public String receiver;
+    @ColumnInfo(name = "type")
+    public String type;
+    @ColumnInfo(name = "status")
+    public boolean isRead;
+
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)
     public Long id;
 
-    public ChatMessage(String content, String time, String sender, String receiver) {
+    public ChatMessage(String content, String time, String sender, String receiver, String type) {
         this.content = content;
         this.time = time;
         this.sender = sender;
         this.receiver = receiver;
+        this.type = type;
+        this.isRead = false;
     }
 
     public String getContent() {
