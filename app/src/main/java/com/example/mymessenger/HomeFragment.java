@@ -66,6 +66,7 @@ public class HomeFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+
     AppCompatButton toolbar;
     ImageView addUserBtn;
     AppCompatButton butSendForAll;
@@ -75,6 +76,7 @@ public class HomeFragment extends Fragment {
     ViewModel viewModel;
     RecyclerView recyclerView;
     DialogFragment addUserDialog;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

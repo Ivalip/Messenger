@@ -2,7 +2,8 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"></uses-permission>
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_POLICY_USB_DATA_SIGNALLING" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -30,9 +31,9 @@
             android:name=".ChatActivity"
             android:exported="false" />
         <service
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
             android:name=".NotificationService"
             android:enabled="true"
-            android:foregroundServiceType="remoteMessaging"
             android:exported="true"
             tools:ignore="ForegroundServicePermission">
         </service>

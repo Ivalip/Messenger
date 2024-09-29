@@ -22,7 +22,7 @@ import java.util.List;
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.MyViewHolder>{
 
     ViewModel viewModel;
-    String lastMessage;
+    ChatMessage lastMessage;
     List<ChatMessage> lastMessages;
     private String[] mData;
     private LayoutInflater mInflater;
@@ -50,21 +50,22 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) { // 0, 1, 2
         holder.title.setText(mData[position]+ " channel");
-        ChatMessage lastMessage = lastMessages.get(position+1);
         try {
+            lastMessage = lastMessages.get(position+1);
+            holder.timeView.setText(DataFormater.bd_formater(lastMessage.time));
             holder.lastMessageView.setText(lastMessage.content);
+            if(lastMessage.status) {
+                holder.statusView.setBackgroundResource(R.drawable.grey_check);
+            }
+            else {
+                holder.statusView.setBackgroundResource(R.drawable.brown_check);
+            }
             Log.d("MESSAGE_TIME", "TIME: " + lastMessage.time);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        try{
-            holder.timeView.setText(DataFormater.bd_formater(lastMessage.time));
 
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        if(lastMessage.isRead) { holder.statusView.setBackgroundResource(R.drawable.grey_check); }
-        else { holder.statusView.setBackgroundResource(R.drawable.brown_check); }
+
         holder.myTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

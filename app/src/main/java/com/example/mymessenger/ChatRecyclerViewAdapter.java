@@ -50,11 +50,10 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         notifyDataSetChanged();
     }
 
-
     @Override
     public NewViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         context = parent.getContext();
-        Log.d("ViewType", viewType+"");
+        Log.d("ViewType", viewType+ "");
         View view;
         if (viewType == VIEW_TYPE_SENT) {
             this.mInflater = LayoutInflater.from(parent.getContext());

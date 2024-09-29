@@ -10,10 +10,10 @@ public class Restarter extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.i("Broadcast Listened", "Service tried to stop");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(new Intent(context, NotificationService.class));
-        } else {
-            context.startService(new Intent(context, NotificationService.class));
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            context.startForegroundService(new Intent(context, NotificationService.class));
+//        } else {
+//            context.startService(new Intent(context, NotificationService.class));
+//        }
     }
 }
