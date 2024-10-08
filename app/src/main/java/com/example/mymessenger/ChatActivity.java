@@ -1,18 +1,15 @@
 package com.example.mymessenger;
 
 import android.app.ActivityManager;
-import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
@@ -20,22 +17,23 @@ import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mymessenger.Database.Entity.ChatMessage;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatActivity extends AppCompatActivity {
-    String numberOfChat;
+    String chatId;
     ViewModel viewModel;
     ChatRecyclerViewAdapter adapter;
     NotificationService notificationService = ServiceLocator.getNotificationService();
     MessageHandler messageHandler;
 
-    ImageButton edit;
+    ImageButton send;
+    ImageButton geo;
     EditText text;
     RecyclerView recyclerView;
-
     AppCompatButton backBut;
     String MyUuid;
 
@@ -47,7 +45,8 @@ public class ChatActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         recyclerView = findViewById(R.id.MESSAGES);
-        edit = findViewById(R.id.button);
+        send = findViewById(R.id.button);
+        geo = findViewById(R.id.GEO);
         text = findViewById(R.id.editText);
         backBut = findViewById(R.id.BackBtn);
 
@@ -67,8 +66,8 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         viewModel = new ViewModel();
-        numberOfChat = intent.getStringExtra("Number");
-        viewModel.createByID(getApplicationContext(), numberOfChat);
+        chatId = intent.getStringExtra("Number");
+        viewModel.createByID(getApplicationContext(), chatId);
         List<ChatMessage> messageList = new ArrayList<>();
 
         //Observing our LiveData for showing it in recyclerView.
@@ -125,7 +124,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (messageHandler.isConnected()) {
-            edit.setOnClickListener(new View.OnClickListener() {
+            send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (text.getText().equals("")) {
@@ -133,22 +132,36 @@ public class ChatActivity extends AppCompatActivity {
                     }
                     else {
                         try {
-                            notificationService.sendMessage(text.getText().toString(), numberOfChat, MyUuid);
+                            String recieverID = String.join(",", notificationService.net.graph.get(chatId).Path);
+                            notificationService.sendMessage(text.getText().toString(), recieverID, MyUuid, "USER");
                         } catch (IOException e) {
+                            Toast toast = Toast.makeText(getApplicationContext(), "User off grid", Toast.LENGTH_LONG);
+                            toast.show();
                             throw new RuntimeException(e);
                         }
 
                         viewModel.insert(new ChatMessage(text.getText().toString(),
                                 DataFormater.formater(System.currentTimeMillis() + ""),
-                                MyUuid, numberOfChat, "USER"));
+                                MyUuid, chatId, "USER"));
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                viewModel.mutableLiveData = viewModel.getById(numberOfChat);
+                                viewModel.mutableLiveData = viewModel.getById(chatId);
                             }
                         }).start();
                         Log.d("INSERT", "OBSERVE");
                         text.setText("");
+                    }
+                }
+            });
+            geo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    try {
+                        String recieverID = String.join(",", notificationService.net.graph.get(chatId).Path);
+                        notificationService.sendMessage("", recieverID, MyUuid, "GEO");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             });
@@ -181,4 +194,6 @@ public class ChatActivity extends AppCompatActivity {
         Log.i ("Service status", "Not running");
         return false;
     }
+
+
 }

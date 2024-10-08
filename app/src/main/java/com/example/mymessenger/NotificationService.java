@@ -2,6 +2,7 @@ package com.example.mymessenger;
 
 import static com.example.mymessenger.MainActivity.APP_PREFERENCES;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,29 +12,67 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.usb.UsbManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
+import com.google.android.gms.location.FusedLocationProviderClient;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.mymessenger.Database.Entity.ChatMessage;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class NotificationService extends Service {
 
     public static final String ChannelID = "ChannelID";
     String MyUuid;
+    Short NetStatus = 0;
+    Short DelayStatus = 0;
+    ArrayList<String> recievers;
+    Net net;
     Repository repository;
-
     private NotificationManagerCompat notificationManagerCompat;
+    FusedLocationProviderClient mFusedLocationClient;
+    NotificationService notificationService = this;
     MessageHandler messageHandler;
-
+    int PERMISSION_ID = 44;
     public MyBinder binder = new MyBinder();
+    Handler timerHandler = new Handler();
+    Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if(NetStatus == 0){
+                net = new Net(notificationService, MyUuid);
+                try {
+                    net.build(); //start forming net
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                NetStatus = 0;
+            }
+            Log.d("TIMER", System.currentTimeMillis()+"");
+            timerHandler.postDelayed(this, 600000); // time between net checks
+        }
+    };
+
 
     @Override
     public void onCreate() {
@@ -49,6 +88,8 @@ public class NotificationService extends Service {
 
         notificationManagerCompat = NotificationManagerCompat.from(this);
         createNotificationChannel();
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        timerHandler.postDelayed(timerRunnable, 10000);
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -135,17 +176,200 @@ public class NotificationService extends Service {
     }
 
     public void sendMessage (String msg, String receiver,
-                             String MyUuid) throws IOException {
-        messageHandler.SendMessage(msg, receiver, MyUuid);
+                             String MyUuid, String type) throws IOException {
+        if (messageHandler.isConnected()) {
+            Log.d("SEND", msg + "<RECIEVER>" + receiver + "<SENDER>" + MyUuid);
+            messageHandler.SendMessage(msg, receiver, MyUuid, type);
+        }
     }
 
     public void insertMessage(ChatMessage message) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                repository.insert(message);
-            };
-        }).start();
+        //if(message.receiver != MyUuid)
+        switch (message.type){
+            case "USER":
+            case "GEO":
+                recievers = new ArrayList<>(Arrays.asList(message.receiver.split(",")));
+                if (recievers.get(0).equals(MyUuid)){
+                    if (recievers.size() > 1){
+                        try {
+                            this.sendMessage(message.content, message.receiver.substring(message.receiver.indexOf(",") + 1), message.sender, "SYS");
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                repository.insert(message);
+                            };
+                        }).start();
+                    }
+                }
+                break;
+            case "SYS":
+                if (message.receiver.isEmpty()){ // netbuilding message
+                    if(!message.content.contains(MyUuid)) {
+                        try {
+                            this.sendMessage("DELAY" + System.currentTimeMillis(), message.sender, MyUuid, "SYS");
+                            new Timer().schedule(new TimerTask() {
+                                @Override
+                                public void run() { // wait for furter nodes
+                                    try {
+                                        if (DelayStatus == 0) {
+                                            notificationService.sendMessage("REBOUND" + message.content + "," + MyUuid, message.sender, MyUuid, "SYS");
+                                        }
+                                        DelayStatus = 0;
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                }
+                            }, 5000);
+                            if (NetStatus == 0) {
+                                net = new Net(this, MyUuid);
+                                if (message.content.isEmpty()) {
+                                    this.sendMessage(MyUuid, "", MyUuid, "SYS");
+                                } else {
+                                    this.sendMessage(message.content + "," + MyUuid, "", MyUuid, "SYS");
+                                }
+                                net.sender = message.sender; // remember sender
+                                NetStatus = 1;
+                            }
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                } else if (message.content.startsWith("DELAY") && message.receiver.equals(MyUuid)) { // delay return signal
+                    DelayStatus = 1;
+                    Long delay = System.currentTimeMillis() - Long.parseLong(message.content.substring(5));
+                    net.cells.put(message.sender, delay); // write down delay
+                } else if (message.content.startsWith("REBOUND") && message.receiver.equals(MyUuid)){ // netbuilding back signal
+                    if (net.sender != null && !net.sender.equals(message.sender)){ // passing threw
+                        Long delay = net.cells.get(message.sender);
+                        if(delay != null) {
+                            try {
+                                this.sendMessage(message.content + "|" + delay, message.sender, MyUuid, "SYS");
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } // send back
+                    } else { // initial reached
+                       net.construct(message.content.substring(7));
+                    }
+                } else if (message.content.startsWith("GRAPH")){
+                    recievers = new ArrayList<>(Arrays.asList(message.receiver.split(",")));
+                    if (recievers.get(0).equals(MyUuid)){
+                        if (recievers.size() > 1){
+                            try {
+                                this.sendMessage(message.content, message.receiver.substring(message.receiver.indexOf(",") + 1), message.sender, "SYS");
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            net = new Net(this, MyUuid, message.content.substring(5));
+                        }
+                    }
+                }
+        }
     }
+
+//    @SuppressLint("MissingPermission")
+//    private void getLastLocation() {
+//        // check if permissions are given
+//        if (checkPermissions()) {
+//
+//            // check if location is enabled
+//            if (isLocationEnabled()) {
+//
+//                // getting last
+//                // location from
+//                // FusedLocationClient
+//                // object
+//                mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+//                    @Override
+//                    public void onComplete(@NonNull Task<Location> task) {
+//                        Location location = task.getResult();
+//                        if (location == null) {
+//                            requestNewLocationData();
+//                        } else {
+//                            latitudeTextView.setText(location.getLatitude() + "");
+//                            longitTextView.setText(location.getLongitude() + "");
+//                        }
+//                    }
+//                });
+//            } else {
+//                Toast.makeText(this, "Please turn on" + " your location...", Toast.LENGTH_LONG).show();
+//                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//                startActivity(intent);
+//            }
+//        } else {
+//            // if permissions aren't available,
+//            // request for permissions
+//            requestPermissions();
+//        }
+//    }
+//
+//    @SuppressLint("MissingPermission")
+//    private void requestNewLocationData() {
+//
+//        // Initializing LocationRequest
+//        // object with appropriate methods
+//        LocationRequest mLocationRequest = new LocationRequest();
+//        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+//        mLocationRequest.setInterval(5);
+//        mLocationRequest.setFastestInterval(0);
+//        mLocationRequest.setNumUpdates(1);
+//
+//        // setting LocationRequest
+//        // on FusedLocationClient
+//        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+//        mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+//    }
+//
+//    private LocationCallback mLocationCallback = new LocationCallback() {
+//
+//        @Override
+//        public void onLocationResult(LocationResult locationResult) {
+//            Location mLastLocation = locationResult.getLastLocation();
+////            latitudeTextView.setText("Latitude: " + mLastLocation.getLatitude() + "");
+////            longitTextView.setText("Longitude: " + mLastLocation.getLongitude() + "");
+//        }
+//    };
+//
+//    // method to check for permissions
+//    private boolean checkPermissions() {
+//        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+//
+//        // If we want background location
+//        // on Android 10.0 and higher,
+//        // use:
+//        // ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED
+//    }
+//
+//    // method to request for permissions
+//    private void requestPermissions() {
+//        ActivityCompat.requestPermissions(this, new String[]{
+//                Manifest.permission.ACCESS_COARSE_LOCATION,
+//                Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_ID);
+//    }
+//
+//    // method to check
+//    // if location is enabled
+//    private boolean isLocationEnabled() {
+//        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+//    }
+//
+//    // If everything is alright then
+//    @Override
+//    public void
+//    onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//
+//        if (requestCode == PERMISSION_ID) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                getLastLocation();
+//            }
+//        }
+//    }
 
 }

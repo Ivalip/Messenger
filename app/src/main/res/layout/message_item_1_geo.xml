@@ -13,12 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:background="@drawable/message_1_l">
-<!--        <LinearLayout-->
-<!--            android:layout_width="20dp"-->
-<!--            android:layout_height="20dp"-->
-<!--            android:layout_gravity="end|bottom"-->
-<!--            android:background="@color/message_1_l">-->
-<!--        </LinearLayout>-->
         <TextView
             android:id="@+id/TEXT"
             android:layout_width="wrap_content"
@@ -38,13 +32,13 @@
             android:layout_marginBottom="15dp"
             android:layout_marginEnd="5dp">
         </TextView>
-
         <TextView
             android:id="@+id/DeleteBut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="Удалить"
             android:layout_gravity="bottom|end"
-            android:layout_marginEnd="5dp"
-            android:text="Удалить"></TextView>
+            android:layout_marginEnd="5dp">
+        </TextView>
     </FrameLayout>
 </RelativeLayout>

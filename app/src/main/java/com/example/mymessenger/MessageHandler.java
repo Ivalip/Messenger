@@ -14,6 +14,8 @@ import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MessageHandler implements SerialInputOutputManager.Listener {
@@ -88,18 +90,21 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
             message += msg;
         }
         if (message.contains("<END>")) {
+            Log.d("SYSMSG", message);
+            String type = message.substring(message.indexOf("<TYPE>")+6, message.indexOf("<ReceiverID"));
             String time = message.substring(message.indexOf("<TIME>") + 6, message.length() - 5);
-            Long ReceiverID = Long.parseLong(message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>")));
-            Long SenderID = Long.parseLong(message.substring(message.indexOf("<SenderID>") + 10, message.indexOf("<START>")));
+            List<String> myList = new ArrayList<>(Arrays.asList(message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>")).split(",")));
+            String ReceiverID = message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>"));
+            String SenderID = message.substring(message.indexOf("<SenderID>") + 10, message.indexOf("<START>"));
             String text = message.substring(message.indexOf("<START>") + 7, message.indexOf("<TIME>"));
-            service.insertMessage(new ChatMessage(text, DataFormater.formater(time), SenderID.toString(),"0", "USER"));
+            service.insertMessage(new ChatMessage(text, DataFormater.formater(time), SenderID, ReceiverID, type));
             message = "";
-        }
+
     }
 
     public void SendMessage (String msg, String numberOfChat,
-                              String MyUuid) throws IOException {
-        msg = "<ReceiverID>" + numberOfChat + "<SenderID>" + MyUuid +
+                              String MyUuid, String type) throws IOException {
+        msg = "<TYPE>" + type + "<ReceiverID>" + numberOfChat + "<SenderID>" + MyUuid +
                 "<START>" + msg + "<TIME>" + System.currentTimeMillis() + "<END>";
         usbSerialPort.write(msg.getBytes(), 2000);
     }

@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,8 +21,11 @@ import java.util.List;
 public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int VIEW_TYPE_SENT = 0;
     public static final int VIEW_TYPE_RECEIVE = 1;
+    public static final int VIEW_TYPE_SENT_GEO = 2;
+    public static final int VIEW_TYPE_RECEIVE_GEO = 3;
     private Context context;
     String MyUuid;
+    String tm;
     ViewModel viewModel = new ViewModel();
     private LayoutInflater mInflater;
     private List<ChatMessage> chatMessages = new ArrayList<>();
@@ -31,11 +35,18 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         MyUuid = sharedPref.getString("uuid_key", "");
         Log.d("UUID_M", chatMessages.get(position).sender);
         Log.d("MyUuid", MyUuid);
-        if (chatMessages.get(position).sender.equals(MyUuid)) {
-            return VIEW_TYPE_SENT;
-        }
-        else {
-            return VIEW_TYPE_RECEIVE;
+        if (chatMessages.get(position).type.equals("GEO")) {
+            if (chatMessages.get(position).sender.equals(MyUuid)) {
+                return VIEW_TYPE_SENT_GEO;
+            } else {
+                return VIEW_TYPE_RECEIVE_GEO;
+            }
+        } else {
+            if (chatMessages.get(position).sender.equals(MyUuid)) {
+                return VIEW_TYPE_SENT;
+            } else {
+                return VIEW_TYPE_RECEIVE;
+            }
         }
     }
 
@@ -55,7 +66,7 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         context = parent.getContext();
         Log.d("ViewType", viewType+ "");
         View view;
-        if (viewType == VIEW_TYPE_SENT) {
+        if (viewType == VIEW_TYPE_SENT || viewType == VIEW_TYPE_SENT_GEO) {
             this.mInflater = LayoutInflater.from(parent.getContext());
             view = mInflater.inflate(R.layout.message_item_1, parent, false);
             return new NewViewHolder(view);
@@ -71,17 +82,40 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         final NewViewHolder viewHolder = (NewViewHolder) holder;
 
         int type = getItemViewType(position);
-
-        viewHolder.content.setText(chatMessages.get(position).content);
-        String tm = chatMessages.get(position).time;
-        viewHolder.time.setText(tm.substring(tm.indexOf(":") + 1, tm.length()-3));
-        viewHolder.deleteBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewModel.deleteById(chatMessages.get(position).id);
-                removeAt(position);
-            }
-        });
+        switch(type) {
+            case VIEW_TYPE_SENT:
+            case VIEW_TYPE_RECEIVE:
+                viewHolder.content.setText(chatMessages.get(position).content);
+                tm = chatMessages.get(position).time;
+                viewHolder.time.setText(tm.substring(tm.indexOf(":") + 1, tm.length() - 3));
+                viewHolder.deleteBut.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        viewModel.deleteById(chatMessages.get(position).id);
+                        removeAt(position);
+                    }
+                });
+            break;
+            case VIEW_TYPE_SENT_GEO:
+            case VIEW_TYPE_RECEIVE_GEO:
+                viewHolder.content.setText(chatMessages.get(position).content);
+                tm = chatMessages.get(position).time;
+                viewHolder.time.setText(tm.substring(tm.indexOf(":") + 1, tm.length() - 3));
+                viewHolder.deleteBut.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        viewModel.deleteById(chatMessages.get(position).id);
+                        removeAt(position);
+                    }
+                });
+                viewHolder.content.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //open nav tab
+                    }
+                });
+            break;
+        }
     }
     public void removeAt(int position) {
         chatMessages.remove(position);

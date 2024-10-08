@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.mymessenger.Database.Entity.ChatMessage;
 
@@ -167,6 +168,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intentForAllSend = new Intent(getContext(), ChatActivity.class);
+                intentForAllSend.putExtra("Number", "0");
                 startActivity(intentForAllSend);
             }
         });

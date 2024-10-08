@@ -38,6 +38,7 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.0")
     implementation ("androidx.room:room-runtime:2.4.2")
     implementation(libs.preference)
+    implementation(libs.play.services.location)
     annotationProcessor ("androidx.room:room-compiler:2.4.2")
     implementation("androidx.navigation:navigation-fragment:2.7.7")
     implementation("androidx.navigation:navigation-ui:2.7.7")

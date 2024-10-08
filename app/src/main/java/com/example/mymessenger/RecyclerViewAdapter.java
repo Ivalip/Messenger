@@ -49,28 +49,24 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) { // 0, 1, 2
+        Log.d("POS", position+"");
         holder.title.setText(mData[position]+ " channel");
         try {
-            lastMessage = lastMessages.get(position+1);
-            holder.timeView.setText(DataFormater.bd_formater(lastMessage.time));
+            lastMessage = lastMessages.get(position + 1);
             holder.lastMessageView.setText(lastMessage.content);
-            if(lastMessage.status) {
-                holder.statusView.setBackgroundResource(R.drawable.grey_check);
-            }
-            else {
-                holder.statusView.setBackgroundResource(R.drawable.brown_check);
-            }
             Log.d("MESSAGE_TIME", "TIME: " + lastMessage.time);
+            holder.timeView.setText(DataFormater.bd_formater(lastMessage.time));
+            if(lastMessage.isRead) { holder.statusView.setBackgroundResource(R.drawable.grey_check); }
+            else { holder.statusView.setBackgroundResource(R.drawable.brown_check); }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
 
         holder.myTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, ChatActivity.class);
-                intent.putExtra("Number", String.valueOf(position));
+                intent.putExtra("Number", String.valueOf(position+1));
                 startActivity(context, intent, null);
             }
         });

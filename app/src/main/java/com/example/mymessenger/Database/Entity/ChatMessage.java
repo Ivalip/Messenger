@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey;
 
 @Entity(tableName = "messages")
 public class ChatMessage {
+
     @ColumnInfo(name = "content")
     public String content;
     @ColumnInfo(name = "time")
@@ -17,7 +18,7 @@ public class ChatMessage {
     @ColumnInfo(name = "type")
     public String type;
     @ColumnInfo(name = "status")
-    public boolean status;
+    public boolean isRead;
 
     @ColumnInfo(name = "id")
     @PrimaryKey(autoGenerate = true)
@@ -29,7 +30,7 @@ public class ChatMessage {
         this.sender = sender;
         this.receiver = receiver;
         this.type = type;
-        this.status = false;
+        this.isRead = false;
     }
 
     public String getContent() {
