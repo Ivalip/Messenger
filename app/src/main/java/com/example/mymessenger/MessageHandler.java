@@ -91,7 +91,7 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
         }
         if (message.contains("<END>")) {
             Log.d("SYSMSG", message);
-            String type = message.substring(message.indexOf("<TYPE>")+6, message.indexOf("<ReceiverID"));
+            String type = message.substring(message.indexOf("<TYPE>") + 6, message.indexOf("<ReceiverID"));
             String time = message.substring(message.indexOf("<TIME>") + 6, message.length() - 5);
             List<String> myList = new ArrayList<>(Arrays.asList(message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>")).split(",")));
             String ReceiverID = message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>"));
@@ -99,7 +99,7 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
             String text = message.substring(message.indexOf("<START>") + 7, message.indexOf("<TIME>"));
             service.insertMessage(new ChatMessage(text, DataFormater.formater(time), SenderID, ReceiverID, type));
             message = "";
-
+        }
     }
 
     public void SendMessage (String msg, String numberOfChat,
