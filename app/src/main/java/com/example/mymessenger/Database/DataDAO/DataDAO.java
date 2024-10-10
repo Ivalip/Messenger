@@ -24,10 +24,10 @@ public interface DataDAO {
     LiveData<List<ChatMessage>> getLast();
 
     @Query("SELECT * FROM messages WHERE receiver = :receiver ORDER BY time ASC")
-    @TypeConverters({AllConverter.class})
     List <ChatMessage> getById(String receiver);
 
-    //@Query("UPDATE messages SET status = true WHERE sender ")
+    @Query("SELECT sender FROM messages WHERE sender != :user_id GROUP BY sender ORDER BY MAX(time) DESC")
+    List <String> getChats(String user_id);
 
     @Insert
     void insert(ChatMessage message);

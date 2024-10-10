@@ -20,7 +20,6 @@ public class MainActivity extends AppCompatActivity {
     Intent mServiceIntent;
     public NotificationService notificationService;
     public static final String APP_PREFERENCES = "mysettings";
-    public MessageHandler messageHandler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,19 +35,23 @@ public class MainActivity extends AppCompatActivity {
             editor.putString("uuid_key", uuid);
             editor.commit();
         }
-
         Log.d("UUID", MyUuid);
 
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, HomeFragment.class, null)
-                    .setReorderingAllowed(true)
-                    .commit();
-        }
         notificationService = new NotificationService();
         mServiceIntent = new Intent(this, notificationService.getClass());
         Log.d("Service", isMyServiceRunning(NotificationService.class)+"");
         attachService();
+
+        Bundle bundle = new Bundle();
+        bundle.putString("MyUUID", MyUuid);
+        HomeFragment homeFragment = new HomeFragment();
+        homeFragment.setArguments(bundle);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, homeFragment, null)
+                    .setReorderingAllowed(true)
+                    .commit();
+        }
     }
 
     ServiceConnection mConnection = new ServiceConnection() {

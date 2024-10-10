@@ -22,10 +22,14 @@ public class Repository {
     public List<ChatMessage> getAll() {
         return dataDAO.getAll();
     }
-    public LiveData<List<ChatMessage>> getLast() {return  dataDAO.getLast();}
+    public LiveData<List<ChatMessage>> getLast() {
+        return  dataDAO.getLast();
+    }
     public List<ChatMessage> getById(String receiver) {
-        Log.d("POLUCHENIYE PO ID", "NE POLUCHIL");
         return dataDAO.getById(receiver);
+    }
+    public List<String> getChats(String userID) {
+        return dataDAO.getChats(userID);
     }
     public void insert(ChatMessage message) {
         dataDAO.insert(message);

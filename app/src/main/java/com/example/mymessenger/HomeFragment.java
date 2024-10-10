@@ -1,7 +1,9 @@
 package com.example.mymessenger;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -72,11 +74,11 @@ public class HomeFragment extends Fragment {
     ImageView addUserBtn;
     AppCompatButton butSendForAll;
     RecyclerViewAdapter adapter;
-    public List<ChatMessage> chatMessages = new ArrayList<>();
-    String[] data = {"1", "2", "3"};
+    List <String> chatsList;
     ViewModel viewModel;
     RecyclerView recyclerView;
     DialogFragment addUserDialog;
+    String MyUUID;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,6 +93,9 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view =  inflater.inflate(R.layout.fragment_home, container, false);
+        Bundle bundle = this.getArguments();
+        MyUUID = bundle.getString("MyUUID");
+        Log.d("UUID", MyUUID);
         return view;
     }
 
@@ -100,13 +105,34 @@ public class HomeFragment extends Fragment {
         recyclerView = view.findViewById(R.id.Scroll);
         toolbar = view.findViewById(R.id.toolbar);
         addUserBtn = view.findViewById(R.id.AddChatBtn);
+
         viewModel = new ViewModel();
-        viewModel.create_for_last(getContext());
-        adapter = new RecyclerViewAdapter(data, viewModel, getActivity());
+        chatsList = new ArrayList<>();
+        addUserDialog = new AddUserDialog(viewModel);
+
+        viewModel.createChats(getContext(), MyUUID);
+        //Observing our LiveData for showing chats in recyclerView
+        viewModel.getChats(MyUUID).observe(getViewLifecycleOwner(), (Observer<? super List<String>>)
+                new Observer<List<String>>() {
+            @Override
+            public void onChanged(List<String> chats) {
+                if (chats.size() == 0) {
+                    Log.d("EMPTY MESSAGES", "Empty list of messages");
+                } else {
+                    chatsList.clear();
+                    for (int i = 0; i < chats.size(); i++) {
+                        chats.add(chatsList.get(i));
+                    }
+                    adapter.newAddedChat(chatsList);
+                }
+            }
+        });
+        adapter = new RecyclerViewAdapter(chatsList, viewModel, getActivity());
         recyclerView.setAdapter(adapter);
 
-        addUserDialog = new AddUserDialog();
+        viewModel.create_for_last(getContext());
 
+        //Observing our LiveData for showing last messages in recyclerView
         viewModel.getLast().observe(getViewLifecycleOwner(), (Observer<? super List<ChatMessage>>)
                 new Observer<List<ChatMessage>>() {
                     @Override
@@ -127,11 +153,11 @@ public class HomeFragment extends Fragment {
                         }
                     }
                 });
-
         @SuppressLint("RestrictedApi")
         MenuBuilder menuBuilder = new MenuBuilder(getContext());
         MenuInflater menuInflater = new MenuInflater(getContext());
         menuInflater.inflate(R.menu.menu, menuBuilder);
+
         toolbar.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("RestrictedApi")
             @Override
@@ -155,10 +181,8 @@ public class HomeFragment extends Fragment {
                         }
                         return false;
                     }
-
                     @Override
                     public void onMenuModeChange(@NonNull MenuBuilder menu) {
-
                     }
                 });
                 optionsMenu.show();
@@ -168,7 +192,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intentForAllSend = new Intent(getContext(), ChatActivity.class);
-                intentForAllSend.putExtra("Number", "0");
+                intentForAllSend.putExtra("ChatID", "0");
                 startActivity(intentForAllSend);
             }
         });

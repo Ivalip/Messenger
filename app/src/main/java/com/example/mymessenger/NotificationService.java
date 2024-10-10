@@ -18,9 +18,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
-import com.google.android.gms.location.FusedLocationProviderClient;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -28,10 +26,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.mymessenger.Database.Entity.ChatMessage;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -49,7 +43,7 @@ public class NotificationService extends Service {
     Net net;
     Repository repository;
     private NotificationManagerCompat notificationManagerCompat;
-    FusedLocationProviderClient mFusedLocationClient;
+//    FusedLocationProviderClient mFusedLocationClient;
     NotificationService notificationService = this;
     MessageHandler messageHandler;
     int PERMISSION_ID = 44;
@@ -88,7 +82,7 @@ public class NotificationService extends Service {
 
         notificationManagerCompat = NotificationManagerCompat.from(this);
         createNotificationChannel();
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+//        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         timerHandler.postDelayed(timerRunnable, 10000);
     }
 

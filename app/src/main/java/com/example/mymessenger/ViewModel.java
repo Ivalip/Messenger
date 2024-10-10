@@ -10,10 +10,7 @@ import java.util.List;
 public class ViewModel extends androidx.lifecycle.ViewModel {
     Repository repository;
     MutableLiveData<List<ChatMessage>> mutableLiveData = new MutableLiveData<>();
-    public void create(Context context) {
-        repository = new Repository(context);
-        getAll();
-    }
+    MutableLiveData<List<String>> users = new MutableLiveData<>();
     public void create_for_last(Context context) {
         repository = new Repository(context);
         getLast();
@@ -22,7 +19,10 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
         repository = new Repository(context);
         mutableLiveData = getById(receiver);
     }
-
+    public void createChats (Context context, String Myuuid) {
+        repository = new Repository(context);
+        users = getChats(Myuuid);
+    }
     public MutableLiveData<List<ChatMessage>> getAll() {
         new Thread(new Runnable() {
             @Override
@@ -41,15 +41,26 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
 //        }).start();
         return repository.getLast();
     }
-    public MutableLiveData<List<ChatMessage>> getById(String number) {
+    public MutableLiveData<List<ChatMessage>> getById(String chatID) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                mutableLiveData.postValue(repository.getById(number));
+                mutableLiveData.postValue(repository.getById(chatID));
             }
         }).start();
         return mutableLiveData;
     }
+
+    public MutableLiveData<List<String>> getChats(String userID) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                users.postValue(repository.getChats(userID));
+            }
+        }).start();
+        return users;
+    }
+
     public void insert(ChatMessage message) {
         new Thread(new Runnable() {
             @Override

@@ -24,7 +24,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     ViewModel viewModel;
     ChatMessage lastMessage;
     List<ChatMessage> lastMessages;
-    private String[] mData;
+    List<String> chats;
     private LayoutInflater mInflater;
     Context context;
     FragmentActivity fragmentActivity;
@@ -33,9 +33,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.lastMessages = lastMessages;
         notifyDataSetChanged();
     }
-
-    RecyclerViewAdapter(String[] data, ViewModel viewModel, FragmentActivity activity) {
-        this.mData = data;
+    public void newAddedChat(List <String> chats){
+        this.chats = chats;
+        notifyDataSetChanged();
+    }
+    RecyclerViewAdapter(List <String> data, ViewModel viewModel, FragmentActivity activity) {
+        this.chats = data;
         this.viewModel = viewModel;
         this.fragmentActivity = activity;
     }
@@ -48,16 +51,20 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) { // 0, 1, 2
+    public void onBindViewHolder(MyViewHolder holder, int position) {
         Log.d("POS", position+"");
-        holder.title.setText(mData[position]+ " channel");
+        holder.title.setText(chats.get(position));
         try {
-            lastMessage = lastMessages.get(position + 1);
+            lastMessage = lastMessages.get(position);
             holder.lastMessageView.setText(lastMessage.content);
             Log.d("MESSAGE_TIME", "TIME: " + lastMessage.time);
             holder.timeView.setText(DataFormater.bd_formater(lastMessage.time));
-            if(lastMessage.isRead) { holder.statusView.setBackgroundResource(R.drawable.grey_check); }
-            else { holder.statusView.setBackgroundResource(R.drawable.brown_check); }
+            if(lastMessage.isRead) {
+                holder.statusView.setBackgroundResource(R.drawable.grey_check);
+            }
+            else {
+                holder.statusView.setBackgroundResource(R.drawable.brown_check);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -66,7 +73,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, ChatActivity.class);
-                intent.putExtra("Number", String.valueOf(position+1));
+                intent.putExtra("ChatID", String.valueOf(position));
                 startActivity(context, intent, null);
             }
         });
@@ -74,7 +81,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
-        return mData.length;
+        return chats.size();
     }
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView title;

@@ -22,8 +22,6 @@ public class Net {
     Map<String, Long> cells = new HashMap<>();
     Map<String, Cell> graph = new HashMap<>();
 
-
-
     public Net(NotificationService notificationService, String MyUuid) {
         this.MyUuid = MyUuid;
         this.notificationService = notificationService;
@@ -76,14 +74,14 @@ public class Net {
             String node2 = nodes.get(nodes.size()-1);
             Long delay = delays.get(0);
             delays.remove(0);
-            if(graph.get(node) == null){
+            if(graph.get(node) == null) {
                 Cell cell = new Cell(node);
                 graph.put(node, cell);
             }
             if(!graph.get(node).connectios.containsKey(node2)) {
                 graph.get(node).addConnection(node2, delay);
             }
-            if(graph.get(node2) == null){
+            if(graph.get(node2) == null) {
                 Cell cell = new Cell(node);
                 graph.put(node, cell);
             }

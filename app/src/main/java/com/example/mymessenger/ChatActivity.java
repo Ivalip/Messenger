@@ -17,7 +17,6 @@ import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mymessenger.Database.Entity.ChatMessage;
-import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,26 +50,17 @@ public class ChatActivity extends AppCompatActivity {
         backBut = findViewById(R.id.BackBtn);
 
         messageHandler = notificationService.getMessageHandler();
-//        attachService();
+        chatId = intent.getStringExtra("ChatID");
 
         SharedPreferences sharedPref = getSharedPreferences("mysettings", Context.MODE_PRIVATE);
         MyUuid = sharedPref.getString("uuid_key", "");
         Log.d("UUID_c", MyUuid);
 
-        backBut.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent();
-                finish();
-            }
-        });
-
         viewModel = new ViewModel();
-        chatId = intent.getStringExtra("Number");
+
+        //Observing our LiveData for showing it in recyclerView
         viewModel.createByID(getApplicationContext(), chatId);
         List<ChatMessage> messageList = new ArrayList<>();
-
-        //Observing our LiveData for showing it in recyclerView.
         viewModel.mutableLiveData.observe(this, (Observer<? super List<ChatMessage>>)
                 new Observer<List<ChatMessage>>() {
             @Override
@@ -91,33 +81,13 @@ public class ChatActivity extends AppCompatActivity {
         Log.d("Service", isMyServiceRunning(NotificationService.class)+"");
         recyclerView.setAdapter(adapter);
 
-//        if (notificationService.isConnection()) {
-//            edit.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View v) {
-//                    if (text.getText().equals("")) {    }
-//                    else {
-//                        try {
-//                            notificationService.sendMessage(text.getText().toString(), numberOfChat, MyUuid);
-//                        } catch (IOException e) {
-//                            throw new RuntimeException(e);
-//                        }
-//
-//                        viewModel.insert(new ChatMessage(text.getText().toString(),
-//                                DataFormater.formater(System.currentTimeMillis() + ""),
-//                                MyUuid, numberOfChat, "USER"));
-//                        new Thread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                viewModel.mutableLiveData = viewModel.getById(numberOfChat);
-//                            }
-//                        }).start();
-//                        Log.d("INSERT", "OBSERVE");
-//                        text.setText("");
-//                    }
-//                }
-//            });
-//        }
+        backBut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                finish();
+            }
+        });
     }
 
     @Override
@@ -128,7 +98,6 @@ public class ChatActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     if (text.getText().equals("")) {
-
                     }
                     else {
                         try {
@@ -139,7 +108,6 @@ public class ChatActivity extends AppCompatActivity {
                             toast.show();
                             throw new RuntimeException(e);
                         }
-
                         viewModel.insert(new ChatMessage(text.getText().toString(),
                                 DataFormater.formater(System.currentTimeMillis() + ""),
                                 MyUuid, chatId, "USER"));
@@ -168,21 +136,6 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-//    private void attachService() {
-//        Intent service = new Intent(this, NotificationService.class);
-//        bindService(service, mConnection, Service.BIND_AUTO_CREATE);
-//    }
-//
-//    private void detachService() {
-//        unbindService(mConnection);
-//    }
-
-    @Override
-    protected void onDestroy() {
-        Log.d("SMERT", "PLAK");
-//        detachService();
-        super.onDestroy();
-    }
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {

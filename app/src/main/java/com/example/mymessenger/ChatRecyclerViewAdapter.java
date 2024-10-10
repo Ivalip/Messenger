@@ -29,6 +29,7 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     ViewModel viewModel = new ViewModel();
     private LayoutInflater mInflater;
     private List<ChatMessage> chatMessages = new ArrayList<>();
+
     @Override
     public int getItemViewType (int position) {
         SharedPreferences sharedPref = context.getSharedPreferences("mysettings", Context.MODE_PRIVATE);
