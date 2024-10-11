@@ -55,6 +55,7 @@ public class NotificationService extends Service {
             if(NetStatus == 0){
                 net = new Net(notificationService, MyUuid);
                 try {
+                    NetStatus = 1;
                     net.build(); //start forming net
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -172,7 +173,7 @@ public class NotificationService extends Service {
     public void sendMessage (String msg, String receiver,
                              String MyUuid, String type) throws IOException {
         if (messageHandler.isConnected()) {
-            Log.d("SEND", msg + "<RECIEVER>" + receiver + "<SENDER>" + MyUuid);
+            //Log.d("SEND", msg + "<RECIEVER>" + receiver + "<SENDER>" + MyUuid);
             messageHandler.SendMessage(msg, receiver, MyUuid, type);
         }
     }
@@ -186,7 +187,7 @@ public class NotificationService extends Service {
                 if (recievers.get(0).equals(MyUuid)){
                     if (recievers.size() > 1){
                         try {
-                            this.sendMessage(message.content, message.receiver.substring(message.receiver.indexOf(",") + 1), message.sender, "SYS");
+                            this.sendMessage(message.content, message.receiver.substring(message.receiver.indexOf(",") + 1), message.sender, message.type);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -198,16 +199,30 @@ public class NotificationService extends Service {
                             };
                         }).start();
                     }
+                } else if (recievers.get(0).equals("0") && !recievers.contains(MyUuid)) {
+                    try {
+                        this.sendMessage(message.content, message.receiver + "," + MyUuid, message.sender, message.type);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            repository.insert(new ChatMessage(message.content, message.time, message.sender, "0", message.type));
+                        };
+                    }).start();
                 }
                 break;
             case "SYS":
-                if (message.receiver.isEmpty()){ // netbuilding message
+                if (message.receiver.isEmpty() && !message.content.startsWith("GRAPH")){ // netbuilding message
                     if(!message.content.contains(MyUuid)) {
                         try {
                             this.sendMessage("DELAY" + System.currentTimeMillis(), message.sender, MyUuid, "SYS");
+                            DelayStatus = 0;
                             new Timer().schedule(new TimerTask() {
                                 @Override
                                 public void run() { // wait for furter nodes
+                                    Log.d("DELAYSTATUS", DelayStatus+"");
                                     try {
                                         if (DelayStatus == 0) {
                                             notificationService.sendMessage("REBOUND" + message.content + "," + MyUuid, message.sender, MyUuid, "SYS");
@@ -217,7 +232,7 @@ public class NotificationService extends Service {
                                         throw new RuntimeException(e);
                                     }
                                 }
-                            }, 5000);
+                            }, 2000);
                             if (NetStatus == 0) {
                                 net = new Net(this, MyUuid);
                                 if (message.content.isEmpty()) {
@@ -234,7 +249,10 @@ public class NotificationService extends Service {
                     }
                 } else if (message.content.startsWith("DELAY") && message.receiver.equals(MyUuid)) { // delay return signal
                     DelayStatus = 1;
-                    Long delay = System.currentTimeMillis() - Long.parseLong(message.content.substring(5));
+                    Long myTime = System.currentTimeMillis();
+                    Long sentTime = Long.parseLong(message.content.substring(5));
+                    Long delay =  myTime - sentTime;
+                    Log.d("DELAY", "My: " + System.currentTimeMillis() + "\nSent: " + sentTime + "\nDelay: " + delay);
                     net.cells.put(message.sender, delay); // write down delay
                 } else if (message.content.startsWith("REBOUND") && message.receiver.equals(MyUuid)){ // netbuilding back signal
                     if (net.sender != null && !net.sender.equals(message.sender)){ // passing threw
@@ -247,7 +265,8 @@ public class NotificationService extends Service {
                             }
                         } // send back
                     } else { // initial reached
-                       net.construct(message.content.substring(7));
+
+                        net.construct(message.content + "|" + net.cells.get(message.sender));
                     }
                 } else if (message.content.startsWith("GRAPH")){
                     recievers = new ArrayList<>(Arrays.asList(message.receiver.split(",")));
@@ -259,6 +278,7 @@ public class NotificationService extends Service {
                                 throw new RuntimeException(e);
                             }
                         } else {
+
                             net = new Net(this, MyUuid, message.content.substring(5));
                         }
                     }

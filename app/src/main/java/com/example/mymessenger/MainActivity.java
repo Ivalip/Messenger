@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i ("Service status", "Not running");
         return false;
     }
-
+    
     @Override
     protected void onDestroy() {
 //        Intent broadcastIntent = new Intent();

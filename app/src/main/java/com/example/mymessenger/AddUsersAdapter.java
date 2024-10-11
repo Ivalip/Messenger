@@ -20,25 +20,28 @@ import java.util.ArrayList;
 
 public class AddUsersAdapter extends RecyclerView.Adapter<AddUsersAdapter.MyAddViewHolder>{
     ArrayList<String> users;
-    Context context;
+    String MyUuid;
     LayoutInflater mInflater;
     String user;
     ViewModel viewModel;
 
-    public AddUsersAdapter(ViewModel viewModel) {
+    public AddUsersAdapter(ViewModel viewModel, ArrayList<String> users, String MyUuid) {
         this.viewModel = viewModel;
+        this.users = users;
+        this.MyUuid = MyUuid;
+        Log.d("USERS", users+"");
     }
-    public void insertUsers() {
-        try {
-            this.users = new ArrayList<>(ServiceLocator.getNotificationService().net.graph.keySet());
-        } catch (NullPointerException e) {
-            Log.d("GRAPH DOESNT EXIST", "PUM PUM PUM");
-            this.users = new ArrayList<>();
-        }
-    }
+//    public void insertUsers() {
+//        try {
+//            this.users = new ArrayList<>(ServiceLocator.getNotificationService().net.graph.keySet());
+//        } catch (NullPointerException e) {
+//            Log.d("GRAPH DOESNT EXIST", "PUM PUM PUM");
+//            this.users = new ArrayList<>();
+//        }
+//        notifyDataSetChanged();
+//    }
     @Override
     public MyAddViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        context = parent.getContext();
         this.mInflater = LayoutInflater.from(parent.getContext());
         View view = mInflater.inflate(R.layout.useritem, parent, false);
         return new MyAddViewHolder(view);
@@ -53,8 +56,7 @@ public class AddUsersAdapter extends RecyclerView.Adapter<AddUsersAdapter.MyAddV
             public void onClick(View v) {
                 user = holder.userIDTextView.getText().toString();
                 viewModel.insert(new ChatMessage("",
-                        "",
-                        "", user, "USER"));
+                        "0", user, MyUuid, "USER"));
                 removeAt(position);
             }
         });
@@ -74,7 +76,8 @@ public class AddUsersAdapter extends RecyclerView.Adapter<AddUsersAdapter.MyAddV
         TextView add;
         public MyAddViewHolder(@NonNull View itemView) {
             super(itemView);
-            userIDTextView = itemView.findViewById(R.id.AddUserBut);
+            userIDTextView = itemView.findViewById(R.id.userID);
+            add = itemView.findViewById(R.id.AddUserBut);
         }
     }
 }

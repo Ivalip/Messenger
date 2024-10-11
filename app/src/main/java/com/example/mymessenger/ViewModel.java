@@ -11,13 +11,13 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
     Repository repository;
     MutableLiveData<List<ChatMessage>> mutableLiveData = new MutableLiveData<>();
     MutableLiveData<List<String>> users = new MutableLiveData<>();
-    public void create_for_last(Context context) {
+//    public void create_for_last(Context context) {
+//        repository = new Repository(context);
+//        getLast();
+//    }
+    public void createByID(Context context, String receiver, String MyUuid) {
         repository = new Repository(context);
-        getLast();
-    }
-    public void createByID(Context context, String receiver) {
-        repository = new Repository(context);
-        mutableLiveData = getById(receiver);
+        mutableLiveData = getById(receiver, MyUuid);
     }
     public void createChats (Context context, String Myuuid) {
         repository = new Repository(context);
@@ -32,20 +32,20 @@ public class ViewModel extends androidx.lifecycle.ViewModel {
         }).start();
         return mutableLiveData;
     }
-    public LiveData<List<ChatMessage>> getLast() {
+    public LiveData<List<ChatMessage>> getLast(String user) {
 //        new Thread(new Runnable() {
 //            @Override
 //            public void run() {
 //                repository.getLast();
 //            }
 //        }).start();
-        return repository.getLast();
+        return repository.getLast(user);
     }
-    public MutableLiveData<List<ChatMessage>> getById(String chatID) {
+    public MutableLiveData<List<ChatMessage>> getById(String chatID, String MyUuid) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                mutableLiveData.postValue(repository.getById(chatID));
+                mutableLiveData.postValue(repository.getById(chatID, MyUuid));
             }
         }).start();
         return mutableLiveData;

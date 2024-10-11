@@ -22,11 +22,12 @@ public class Repository {
     public List<ChatMessage> getAll() {
         return dataDAO.getAll();
     }
-    public LiveData<List<ChatMessage>> getLast() {
-        return  dataDAO.getLast();
+    public LiveData<List<ChatMessage>> getLast(String user) {
+        return  dataDAO.getLast(user, "0");
     }
-    public List<ChatMessage> getById(String receiver) {
-        return dataDAO.getById(receiver);
+    public List<ChatMessage> getById(String receiver, String user) {
+        String time = "0";
+        return dataDAO.getById(receiver, user, time);
     }
     public List<String> getChats(String userID) {
         return dataDAO.getChats(userID);

@@ -59,7 +59,7 @@ public class ChatActivity extends AppCompatActivity {
         viewModel = new ViewModel();
 
         //Observing our LiveData for showing it in recyclerView
-        viewModel.createByID(getApplicationContext(), chatId);
+        viewModel.createByID(getApplicationContext(), chatId, MyUuid);
         List<ChatMessage> messageList = new ArrayList<>();
         viewModel.mutableLiveData.observe(this, (Observer<? super List<ChatMessage>>)
                 new Observer<List<ChatMessage>>() {
@@ -100,12 +100,21 @@ public class ChatActivity extends AppCompatActivity {
                     if (text.getText().equals("")) {
                     }
                     else {
+                        String recieverID = "";
+                        if(chatId.equals("0")){
+                            recieverID = "0," + MyUuid;
+                        } else {
+                            try {
+                                recieverID = String.join(",", notificationService.net.graph.get(chatId).Path);
+                            } catch (Exception e) {
+                                Toast toast = Toast.makeText(getApplicationContext(), "User off grid", Toast.LENGTH_LONG);
+                                toast.show();
+                                throw new RuntimeException(e);
+                            }
+                        }
                         try {
-                            String recieverID = String.join(",", notificationService.net.graph.get(chatId).Path);
                             notificationService.sendMessage(text.getText().toString(), recieverID, MyUuid, "USER");
                         } catch (IOException e) {
-                            Toast toast = Toast.makeText(getApplicationContext(), "User off grid", Toast.LENGTH_LONG);
-                            toast.show();
                             throw new RuntimeException(e);
                         }
                         viewModel.insert(new ChatMessage(text.getText().toString(),
@@ -114,7 +123,7 @@ public class ChatActivity extends AppCompatActivity {
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
-                                viewModel.mutableLiveData = viewModel.getById(chatId);
+                                viewModel.mutableLiveData = viewModel.getById(chatId, MyUuid);
                             }
                         }).start();
                         Log.d("INSERT", "OBSERVE");

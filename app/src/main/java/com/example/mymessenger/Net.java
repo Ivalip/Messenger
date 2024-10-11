@@ -44,6 +44,7 @@ public class Net {
             graph = graph.substring(graph.indexOf("}") + 1);
         }// graph parsing
         this.Dejkstra(MyUuid);
+        Log.d("GRAPH", NET.graphToString(this.graph));
     }
 
     void build() throws IOException {
@@ -55,20 +56,32 @@ public class Net {
             }
             NET.Dejkstra(MyUuid); // deikstra
             ArrayList<String> graphKeys = new ArrayList<>(graph.keySet());
+            Log.d("BUILD", "graphKeys: "+graphKeys);
             for (int i = 0; i < graphKeys.size(); i++) {
-                NET.sendGraph(graphKeys.get(i));
+                if(!graphKeys.get(i).equals(MyUuid)) {
+                    Log.d("BUILD", "sendingTO: " + graphKeys.get(i));
+                    NET.sendGraph(graphKeys.get(i));
+                }
             } // send graph
             Log.d("GRAPH", NET.graphToString(graph));
         }}, 15000);
     }
 
     void construct(String message) {
+        if (message.contains("REBOUND")){
+            message = message.substring(message.indexOf("REBOUND")+7);
+        }
+        Log.d("GRAPHMSG", message);
         ArrayList<String> nodes = new ArrayList<>(Arrays.asList(message.split(",")));
+        String newel = Arrays.asList(nodes.get(nodes.size()-1).split("\\|")).get(0);
         nodes.remove(nodes.size()-1);
+        nodes.add(newel);
         ArrayList<String> tmp = new ArrayList<>(Arrays.asList(message.split("\\|")));
-        ArrayList<Long> delays = tmp.subList(0, tmp.size()-1).stream()
+        Log.d("GRAPHMSG", tmp.subList(1, tmp.size()).toString());
+        ArrayList<Long> delays = tmp.subList(1, tmp.size()).stream()
                 .map(Long::parseLong).collect(Collectors.toCollection(ArrayList::new));
-        while(!delays.isEmpty() && nodes.size()>1) {
+        Log.d("GRAPHRAW", "NODES: " + nodes.toString() + "\nDELAYS: " + delays.toString());
+        while(!delays.isEmpty()) {
             String node = nodes.get(nodes.size()-1);
             nodes.remove(nodes.size()-1);
             String node2 = nodes.get(nodes.size()-1);
@@ -82,21 +95,26 @@ public class Net {
                 graph.get(node).addConnection(node2, delay);
             }
             if(graph.get(node2) == null) {
-                Cell cell = new Cell(node);
-                graph.put(node, cell);
+                Cell cell = new Cell(node2);
+                graph.put(node2, cell);
             }
             if(!graph.get(node2).connectios.containsKey(node)){
                 graph.get(node2).addConnection(node, delay);
             }
         }
+        Log.d("MARK", "connection() finished");
     }
 
     void Dejkstra(String startcell){
+        Log.d("MARK", "Dejkstra() started");
         graph.get(startcell).startCellInit();
+        Log.d("Dejkstra", "Startcell: "+startcell);
         ArrayList<Cell> unsettledCells = new ArrayList<>();
         Cell currentCell = graph.get(startcell);
         do {
+            Log.d("Dejkstra", "CurrentCell: "+currentCell.MyUuid);
             ArrayList<String> connectedCells = new ArrayList<>(currentCell.connectios.keySet());
+            Log.d("Dejkstra", "ConnectedCells: "+connectedCells.toString());
             for (int i = 0; i < connectedCells.size(); ++i) {
                 Cell node = graph.get(connectedCells.get(i));
                 if(!node.isSettled) {
@@ -111,13 +129,19 @@ public class Net {
             }
             currentCell.isSettled = true;
             if(!unsettledCells.isEmpty()) {
+                unsettledCells.remove(currentCell);
+            }
+            Log.d("Dejkstra", "CurrentCellStatus: "+graph.get(currentCell.MyUuid).isSettled);
+            if(!unsettledCells.isEmpty()) {
                 currentCell = getMinCell(unsettledCells);
             }// getting closet unsettled cell
         } while(!unsettledCells.isEmpty());
         this.buildRoutes();
+        Log.d("MARK", "Dejkstra() finished");
     }
 
     void buildRoutes(){
+        Log.d("MARK", "buildRoutes() started");
         ArrayList<String> graphKeys = new ArrayList<>(graph.keySet());
         for (int i = 0; i < graphKeys.size(); i++) {
             Cell currentCell = graph.get(graphKeys.get(i));
@@ -127,6 +151,7 @@ public class Net {
                 tmpCell = graph.get(tmpCell.PreviousCell);
             }
         }
+        Log.d("MARK", "buildRoutes() finished");
     }
 
     Cell getMinCell(ArrayList<Cell> unsettledCells){
@@ -140,9 +165,10 @@ public class Net {
     }
 
     void sendGraph(String target){
-        String recieverID = String.join(",", graph.get(target).Path);
+        String receiverID = String.join(",", graph.get(target).Path);
+        Log.d("SendGRAPH", "reciever: "+receiverID);
         try {
-            notificationService.sendMessage("GRAPH" + graphToString(graph), recieverID, MyUuid, "SYS");
+            notificationService.sendMessage("GRAPH" + graphToString(graph), receiverID, MyUuid, "SYS");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

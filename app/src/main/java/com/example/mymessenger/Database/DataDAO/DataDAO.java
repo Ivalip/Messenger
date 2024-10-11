@@ -20,13 +20,14 @@ public interface DataDAO {
     @Query("SELECT * FROM messages")
     List<ChatMessage> getAll();
 
-    @Query("SELECT *, MAX(time) FROM messages GROUP BY receiver")
-    LiveData<List<ChatMessage>> getLast();
+    @Query("SELECT *, MAX(time) FROM messages WHERE receiver = :user OR (sender = :user and receiver != :reciever) GROUP BY receiver")
+    LiveData<List<ChatMessage>> getLast(String user, String reciever);
 
-    @Query("SELECT * FROM messages WHERE receiver = :receiver ORDER BY time ASC")
-    List <ChatMessage> getById(String receiver);
+    @Query("SELECT * FROM messages WHERE ((receiver = :receiver AND sender = :user) OR" +
+            " (receiver = :user AND sender = :receiver) OR (receiver = :zero AND receiver = :receiver)) AND time != :zero ORDER BY time ASC")
+    List <ChatMessage> getById(String receiver, String user, String zero);
 
-    @Query("SELECT sender FROM messages WHERE sender != :user_id GROUP BY sender ORDER BY MAX(time) DESC")
+    @Query("SELECT sender FROM messages WHERE receiver = :user_id GROUP BY sender ORDER BY MAX(time) DESC")
     List <String> getChats(String user_id);
 
     @Insert

@@ -36,6 +36,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public void newAddedChat(List <String> chats){
         this.chats = chats;
         notifyDataSetChanged();
+        Log.d("CHATUPDT", "Chats: " + this.chats);
     }
     RecyclerViewAdapter(List <String> data, ViewModel viewModel, FragmentActivity activity) {
         this.chats = data;
@@ -73,7 +74,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, ChatActivity.class);
-                intent.putExtra("ChatID", String.valueOf(position));
+                intent.putExtra("ChatID", chats.get(position));
                 startActivity(context, intent, null);
             }
         });

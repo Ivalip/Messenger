@@ -27,6 +27,23 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
     BroadcastReceiver broadcastReceiver;
     UsbManager usbManager;
     NotificationService service;
+    String type = "";
+    boolean typeRecieved = false;
+    String time = "";
+    boolean timeRecieved = false;
+    String receiverID = "";
+    boolean recieverIDRecieved = false;
+    String senderID = "";
+    boolean senderIDRecieved = false;
+    String text = "";
+    boolean textRecieved = false;
+    //Thread in = new Thread();
+    int t1;
+    int t2;
+    int t3;
+    int t4;
+    int t5;
+    int t6;
 
     public MessageHandler(Context context, NotificationService service, UsbManager usbManager) {
         Log.d("Handler", "CREATED");
@@ -80,33 +97,121 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
 
     @Override
     public void onNewData(byte[] data) {
-        new Thread(() -> {
+//        if(in.isAlive()){
+//            AddMessage(new String(data));
+//        } else {
+//            in.start();
             AddMessage(new String(data));
-        }).start();
+//        }
     }
 
     public void AddMessage (String msg) {
         if (!msg.isEmpty()) {
+            //if(!((message.endsWith("<") && msg.equals("<")) || (message.endsWith(">")) && msg.equals(">"))) {
             message += msg;
+            //}
+            t1 = message.indexOf("<TYPE>");
+            t2 = message.indexOf("<ReceiverID>");
+            t3 = message.indexOf("<SenderID>");
+            t4 = message.indexOf("<START>");
+            t5 = message.indexOf("<TIME>");
+            t6 = message.indexOf("<END>");
         }
-        if (message.contains("<END>")) {
-            Log.d("SYSMSG", message);
-            String type = message.substring(message.indexOf("<TYPE>") + 6, message.indexOf("<ReceiverID"));
-            String time = message.substring(message.indexOf("<TIME>") + 6, message.length() - 5);
-            List<String> myList = new ArrayList<>(Arrays.asList(message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>")).split(",")));
-            String ReceiverID = message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>"));
-            String SenderID = message.substring(message.indexOf("<SenderID>") + 10, message.indexOf("<START>"));
-            String text = message.substring(message.indexOf("<START>") + 7, message.indexOf("<TIME>"));
-            service.insertMessage(new ChatMessage(text, DataFormater.formater(time), SenderID, ReceiverID, type));
+//        if (msg.endsWith("<TY")) {
+//            message = "<TY";
+//        }
+        if (!typeRecieved) {
+            if (t1 != -1 && t2 > t1) {
+                Log.d("MSGHandler", "Get type: " + message);
+                type = message.substring(t1 + 6, t2);
+                message = message.substring(t2);
+                typeRecieved = true;
+            }
+        }
+        if (!recieverIDRecieved) {
+            if (t2 != -1 && t3 > t2) {
+                Log.d("MSGHandler", "Get receiver: " + message);
+                receiverID = message.substring(t2 + 12, t3);
+                message = message.substring(t3);
+                recieverIDRecieved = true;
+            }
+        }
+        if(!senderIDRecieved) {
+            if (t3 != -1 && t4 > t3) {
+                Log.d("MSGHandler", "Get sender: " + message);
+                senderID = message.substring(t3 + 10, t4);
+                message = message.substring(t4);
+                senderIDRecieved = true;
+            }
+        }
+        if(!textRecieved) {
+            if (t4 != -1 && t5 > t4) {
+                Log.d("MSGHandler", "Get text: " + message);
+                text = message.substring(t4 + 7, t5);
+                message = message.substring(t5);
+                textRecieved = true;
+            }
+        }
+        if(!timeRecieved) {
+            if (t5 != -1 && t6 > t5) {
+                Log.d("MSGHandler", "Get time: " + message);
+                time = message.substring(t5 + 6, t6);
+                message = "";
+                timeRecieved = true;
+            }
+        }
+//        Log.d("MESSAGERecieved", "" + typeRecieved + recieverIDRecieved +
+//                senderIDRecieved + textRecieved + timeRecieved);
+        if (typeRecieved && recieverIDRecieved && senderIDRecieved && textRecieved && timeRecieved
+                && message.contains("###")){
+            Log.d("RECIEVE", "content: "+text+
+                    " reciever: "+receiverID+
+                    " sender: "+senderID+
+                    " time: "+time+
+                    " type: "+type);
+            service.insertMessage(new ChatMessage(text, DataFormater.formater(time), senderID, receiverID, type));
+            type = "";
+            typeRecieved = false;
+            receiverID = "";
+            recieverIDRecieved = false;
+            senderID = "";
+            senderIDRecieved = false;
+            text = "";
+            textRecieved = false;
+            time = "";
+            timeRecieved = false;
+        }
+        t1 = message.lastIndexOf("<");
+        t2 = message.lastIndexOf(">");
+        if(t1 != -1 && t2 > t1) {
+            message = message.substring(t1);
+        }
+        if (message.contains("###")){
             message = "";
         }
+//        if (message.contains("<END>")) {
+//            Log.d("SYSMSG", message);
+//            type = message.substring(message.indexOf("<TYPE>") + 6, message.indexOf("<ReceiverID"));
+//            List<String> myList = new ArrayList<>(Arrays.asList(message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>")).split(",")));
+//            receiverID = message.substring(message.indexOf("<ReceiverID>") + 12, message.indexOf("<SenderID>"));
+//            senderID = message.substring(message.indexOf("<SenderID>") + 10, message.indexOf("<START>"));
+//            text = message.substring(message.indexOf("<START>") + 7, message.indexOf("<TIME>"));
+//            time = message.substring(message.indexOf("<TIME>") + 6, message.length() - 5);
+//            service.insertMessage(new ChatMessage(text, DataFormater.formater(time), senderID, receiverID, type));
+//            message = "";
+//        }
     }
 
     public void SendMessage (String msg, String numberOfChat,
                               String MyUuid, String type) throws IOException {
         msg = "<TYPE>" + type + "<ReceiverID>" + numberOfChat + "<SenderID>" + MyUuid +
                 "<START>" + msg + "<TIME>" + System.currentTimeMillis() + "<END>";
-        usbSerialPort.write(msg.getBytes(), 2000);
+        for (int i = 0; i < 3; i++) {
+            Log.d("MSGHANDKER", "Sending " + msg);
+            usbSerialPort.write(msg.getBytes(), 0);
+        }
+        Log.d("MSGHANDKER", "Sending ###");
+        usbSerialPort.write("###".getBytes(), 0);
     }
 
     @Override

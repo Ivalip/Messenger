@@ -9,6 +9,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
+    <FrameLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:elevation="20dp">
+    </FrameLayout>
     <LinearLayout
         android:id="@+id/LL"
         android:gravity="start"

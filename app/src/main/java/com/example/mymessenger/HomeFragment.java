@@ -108,7 +108,7 @@ public class HomeFragment extends Fragment {
 
         viewModel = new ViewModel();
         chatsList = new ArrayList<>();
-        addUserDialog = new AddUserDialog(viewModel);
+        addUserDialog = new AddUserDialog(viewModel, MyUUID);
 
         viewModel.createChats(getContext(), MyUUID);
         //Observing our LiveData for showing chats in recyclerView
@@ -116,12 +116,13 @@ public class HomeFragment extends Fragment {
                 new Observer<List<String>>() {
             @Override
             public void onChanged(List<String> chats) {
+                Log.d("HOMEFRGMNT", "Chats changed: " + chats);
                 if (chats.size() == 0) {
                     Log.d("EMPTY MESSAGES", "Empty list of messages");
                 } else {
                     chatsList.clear();
                     for (int i = 0; i < chats.size(); i++) {
-                        chats.add(chatsList.get(i));
+                        chatsList.add(chats.get(i));
                     }
                     adapter.newAddedChat(chatsList);
                 }
@@ -130,10 +131,10 @@ public class HomeFragment extends Fragment {
         adapter = new RecyclerViewAdapter(chatsList, viewModel, getActivity());
         recyclerView.setAdapter(adapter);
 
-        viewModel.create_for_last(getContext());
+        //viewModel.create_for_last(getContext());
 
         //Observing our LiveData for showing last messages in recyclerView
-        viewModel.getLast().observe(getViewLifecycleOwner(), (Observer<? super List<ChatMessage>>)
+        viewModel.getLast(MyUUID).observe(getViewLifecycleOwner(), (Observer<? super List<ChatMessage>>)
                 new Observer<List<ChatMessage>>() {
                     @Override
                     public void onChanged(List<ChatMessage> messages) {

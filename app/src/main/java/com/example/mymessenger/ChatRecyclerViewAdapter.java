@@ -34,8 +34,8 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     public int getItemViewType (int position) {
         SharedPreferences sharedPref = context.getSharedPreferences("mysettings", Context.MODE_PRIVATE);
         MyUuid = sharedPref.getString("uuid_key", "");
-        Log.d("UUID_M", chatMessages.get(position).sender);
-        Log.d("MyUuid", MyUuid);
+        //Log.d("UUID_M", chatMessages.get(position).sender);
+        //Log.d("MyUuid", MyUuid);
         if (chatMessages.get(position).type.equals("GEO")) {
             if (chatMessages.get(position).sender.equals(MyUuid)) {
                 return VIEW_TYPE_SENT_GEO;
