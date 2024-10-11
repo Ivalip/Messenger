@@ -14,6 +14,7 @@ import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -123,41 +124,56 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
         if (!typeRecieved) {
             if (t1 != -1 && t2 > t1) {
                 Log.d("MSGHandler", "Get type: " + message);
-                type = message.substring(t1 + 6, t2);
-                message = message.substring(t2);
-                typeRecieved = true;
+                ArrayList<String> data = new ArrayList<>(Arrays.asList(message.substring(t1 + 6, t2).split("\\|")));
+                if((Hash(data.get(0))+"").equals(data.get(1))){
+                    type = data.get(0);
+                    message = message.substring(t2);
+                    typeRecieved = true;
+                }
             }
         }
         if (!recieverIDRecieved) {
             if (t2 != -1 && t3 > t2) {
                 Log.d("MSGHandler", "Get receiver: " + message);
-                receiverID = message.substring(t2 + 12, t3);
-                message = message.substring(t3);
-                recieverIDRecieved = true;
+                ArrayList<String> data = new ArrayList<>(Arrays.asList(message.substring(t2 + 12, t3).split("\\|")));
+                if((Hash(data.get(0))+"").equals(data.get(1))) {
+                    receiverID = data.get(0);
+                    message = message.substring(t3);
+                    recieverIDRecieved = true;
+                }
             }
         }
         if(!senderIDRecieved) {
             if (t3 != -1 && t4 > t3) {
                 Log.d("MSGHandler", "Get sender: " + message);
-                senderID = message.substring(t3 + 10, t4);
-                message = message.substring(t4);
-                senderIDRecieved = true;
+                ArrayList<String> data = new ArrayList<>(Arrays.asList(message.substring(t3 + 10, t4).split("\\|")));
+                if((Hash(data.get(0))+"").equals(data.get(1))) {
+                    senderID = data.get(0);
+                    message = message.substring(t4);
+                    senderIDRecieved = true;
+                }
             }
         }
         if(!textRecieved) {
             if (t4 != -1 && t5 > t4) {
                 Log.d("MSGHandler", "Get text: " + message);
-                text = message.substring(t4 + 7, t5);
-                message = message.substring(t5);
-                textRecieved = true;
+                ArrayList<String> data = new ArrayList<>(Arrays.asList(message.substring(t4 + 7, t5).split("\\|")));
+                if((Hash(data.get(0))+"").equals(data.get(1))) {
+                    text = data.get(0);
+                    message = message.substring(t5);
+                    textRecieved = true;
+                }
             }
         }
         if(!timeRecieved) {
             if (t5 != -1 && t6 > t5) {
                 Log.d("MSGHandler", "Get time: " + message);
-                time = message.substring(t5 + 6, t6);
-                message = "";
-                timeRecieved = true;
+                ArrayList<String> data = new ArrayList<>(Arrays.asList(message.substring(t5 + 6, t6).split("\\|")));
+                if((Hash(data.get(0))+"").equals(data.get(1))) {
+                    time = data.get(0);
+                    message = "";
+                    timeRecieved = true;
+                }
             }
         }
 //        Log.d("MESSAGERecieved", "" + typeRecieved + recieverIDRecieved +
@@ -204,8 +220,12 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
 
     public void SendMessage (String msg, String numberOfChat,
                               String MyUuid, String type) throws IOException {
-        msg = "<TYPE>" + type + "<ReceiverID>" + numberOfChat + "<SenderID>" + MyUuid +
-                "<START>" + msg + "<TIME>" + System.currentTimeMillis() + "<END>";
+        String time = System.currentTimeMillis() + "";
+        msg = "<TYPE>" + type + "|" + Hash(type) +
+                "<ReceiverID>" + numberOfChat + "|" + Hash(numberOfChat) +
+                "<SenderID>" + MyUuid + "|" + Hash(MyUuid) +
+                "<START>" + msg + "|" + Hash(msg) +
+                "<TIME>" + time + "|" + Hash(time) + "<END>";
         for (int i = 0; i < 3; i++) {
             Log.d("MSGHANDKER", "Sending " + msg);
             usbSerialPort.write(msg.getBytes(), 0);
@@ -230,6 +250,14 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
         return day + ":" + String.format("%2s", hour).replace(' ', '0') + ":" +
                 String.format("%2s", minutes).replace(' ', '0') + ":" +
                 String.format("%2s", seconds).replace(' ', '0');
+    }
+
+    public int Hash(String s){
+        int hash = 7;
+        for (int i = 0; i < s.length(); i++) {
+            hash = hash*31 + s.charAt(i);
+        }
+        return hash;
     }
 
 }
