@@ -30,6 +30,8 @@ public interface DataDAO {
     @Query("SELECT sender FROM messages WHERE receiver = :user_id GROUP BY sender ORDER BY MAX(time) DESC")
     List <String> getChats(String user_id);
 
+
+
     @Insert
     void insert(ChatMessage message);
 

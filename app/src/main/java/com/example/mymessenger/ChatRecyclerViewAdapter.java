@@ -81,7 +81,6 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         final NewViewHolder viewHolder = (NewViewHolder) holder;
-
         int type = getItemViewType(position);
         switch(type) {
             case VIEW_TYPE_SENT:

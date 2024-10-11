@@ -10,7 +10,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
     <FrameLayout
-        android:id="@+id/container"
+        android:id="@+id/CompassContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:elevation="20dp">

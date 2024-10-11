@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         Intent service = new Intent(this, NotificationService.class);
         bindService(service, mConnection, Service.BIND_AUTO_CREATE);
     }
+
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     
     @Override
     protected void onDestroy() {
+
 //        Intent broadcastIntent = new Intent();
 //        broadcastIntent.setAction("restartservice");
 //        broadcastIntent.setClass(this, Restarter.class);

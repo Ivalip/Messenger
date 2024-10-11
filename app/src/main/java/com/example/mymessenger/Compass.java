@@ -1,16 +1,22 @@
 package com.example.mymessenger;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +29,7 @@ import android.widget.ImageView;
  * Use the {@link Compass#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class Compass  extends Fragment implements SensorEventListener {
+public class Compass extends Fragment implements SensorEventListener, LocationListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -33,6 +39,7 @@ public class Compass  extends Fragment implements SensorEventListener {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    Context context;
     private ImageView compassImage;
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -42,9 +49,12 @@ public class Compass  extends Fragment implements SensorEventListener {
     private boolean isAccelerometerSet = false;
     private boolean isMagnetometerSet = false;
     private float currentDegree = 0f;
+    String latitude;
+    String longitude;
+    LocationManager locationManager;
+    LocationListener locationListener;
 
     public Compass() {
-        // Required empty public constructor
     }
 
     /**
@@ -90,6 +100,21 @@ public class Compass  extends Fragment implements SensorEventListener {
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        locationManager = (LocationManager)
+                getContext().getSystemService(Context.LOCATION_SERVICE);
+        locationListener = new MyLocationListener();
+
+        if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(getContext(),
+                android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{
+                    android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 123);
+            return;
+        }
+        locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+        notify();
     }
 
     @Override
@@ -147,6 +172,20 @@ public class Compass  extends Fragment implements SensorEventListener {
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        latitude = String.valueOf(location.getLatitude());
+        longitude = String.valueOf(location.getLongitude());
+    }
+    @Override
+    public void onProviderEnabled(@NonNull String provider) {
+    }
+
+    @Override
+    public void onProviderDisabled(@NonNull String provider) {
 
     }
 }
