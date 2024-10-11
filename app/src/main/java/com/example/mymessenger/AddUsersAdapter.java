@@ -24,11 +24,13 @@ public class AddUsersAdapter extends RecyclerView.Adapter<AddUsersAdapter.MyAddV
     LayoutInflater mInflater;
     String user;
     ViewModel viewModel;
+    RecyclerViewAdapter adapter;
 
-    public AddUsersAdapter(ViewModel viewModel, ArrayList<String> users, String MyUuid) {
+    public AddUsersAdapter(ViewModel viewModel, ArrayList<String> users, String MyUuid, RecyclerViewAdapter adapter) {
         this.viewModel = viewModel;
         this.users = users;
         this.MyUuid = MyUuid;
+        this.adapter = adapter;
         Log.d("USERS", users+"");
     }
 //    public void insertUsers() {
@@ -58,6 +60,7 @@ public class AddUsersAdapter extends RecyclerView.Adapter<AddUsersAdapter.MyAddV
                 viewModel.insert(new ChatMessage("",
                         "0", user, MyUuid, "USER"));
                 removeAt(position);
+                adapter.notifyDataSetChanged();
             }
         });
     }

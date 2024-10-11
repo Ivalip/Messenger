@@ -15,15 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AddUserDialog extends DialogFragment {
+    RecyclerViewAdapter adapterR;
     String MyUuid;
     RecyclerView recyclerView;
     ArrayList<String> users;
     AddUsersAdapter adapter;
     ViewModel viewModel;
 
-    public AddUserDialog(ViewModel viewModel, String MyUuid) {
+    public AddUserDialog(ViewModel viewModel, String MyUuid, RecyclerViewAdapter adapter) {
         this.viewModel = viewModel;
         this.MyUuid = MyUuid;
+        this.adapterR = adapter;
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -43,7 +45,8 @@ public class AddUserDialog extends DialogFragment {
             Log.d("GRAPH DOESNT EXIST", "PUM PUM PUM");
             users = new ArrayList<>();
         }
-        adapter = new AddUsersAdapter(viewModel, users, MyUuid);
+        adapter = new AddUsersAdapter(viewModel, users, MyUuid, adapterR);
+
         //adapter.insertUsers();
         recyclerView.setAdapter(adapter);
         v.findViewById(R.id.btnAdd).setOnClickListener(new View.OnClickListener() {

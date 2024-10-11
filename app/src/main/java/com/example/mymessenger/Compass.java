@@ -6,6 +6,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,6 +24,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,6 +55,7 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
     String longitude;
     LocationManager locationManager;
     LocationListener locationListener;
+    TextView coords;
 
     public Compass() {
     }
@@ -100,11 +103,20 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
         sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        coords = view.findViewById(R.id.coords);
+        String dest = getArguments().getString("DEST");
+        Log.d("DEST", dest);
+        String destLongitude = dest.substring(0, dest.indexOf("\n"));
+        String destLatitude = dest.substring(dest.indexOf("\n")+1);
 
         locationManager = (LocationManager)
                 getContext().getSystemService(Context.LOCATION_SERVICE);
         locationListener = new MyLocationListener();
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
 
+        String best = locationManager.getBestProvider(criteria, true);
+        // getLastKnownLocation so that user don't need to wait
         if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getContext(),
                 android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -112,9 +124,9 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
                     android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 123);
             return;
         }
+        Location location = locationManager.getLastKnownLocation(best);
         locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
-        notify();
     }
 
     @Override
@@ -146,6 +158,7 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
             if (success) {
                 float[] orientation = new float[3];
                 SensorManager.getOrientation(rotationMatrix, orientation);
+                //Log.d("ORIENTATION", orientation+"");
                 float azimuthInRadians = orientation[0];
                 float azimuthInDegrees = (float) Math.toDegrees(azimuthInRadians);
                 rotateCompassImage(azimuthInDegrees);
@@ -179,6 +192,8 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
     public void onLocationChanged(@NonNull Location location) {
         latitude = String.valueOf(location.getLatitude());
         longitude = String.valueOf(location.getLongitude());
+        Log.d("locChange", latitude + longitude);
+        coords.setText(latitude + "\n" + longitude);
     }
     @Override
     public void onProviderEnabled(@NonNull String provider) {

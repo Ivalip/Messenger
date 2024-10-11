@@ -108,7 +108,6 @@ public class HomeFragment extends Fragment {
 
         viewModel = new ViewModel();
         chatsList = new ArrayList<>();
-        addUserDialog = new AddUserDialog(viewModel, MyUUID);
 
         viewModel.createChats(getContext(), MyUUID);
         //Observing our LiveData for showing chats in recyclerView
@@ -129,6 +128,7 @@ public class HomeFragment extends Fragment {
             }
         });
         adapter = new RecyclerViewAdapter(chatsList, viewModel, getActivity());
+        addUserDialog = new AddUserDialog(viewModel, MyUUID, adapter);
         recyclerView.setAdapter(adapter);
 
         //viewModel.create_for_last(getContext());

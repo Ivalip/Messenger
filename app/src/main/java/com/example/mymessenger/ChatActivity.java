@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -85,7 +86,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        adapter = new ChatRecyclerViewAdapter(getApplicationContext(), messageList, viewModel);
+        adapter = new ChatRecyclerViewAdapter(getApplicationContext(), messageList, viewModel, this);
         recyclerView.setAdapter(adapter);
 
         backBut.setOnClickListener(new View.OnClickListener() {
@@ -105,10 +106,9 @@ public class ChatActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     if (text.getText().equals("")) {
-                    }
-                    else {
+                    } else {
                         String recieverID = "";
-                        if(chatId.equals("0")){
+                        if (chatId.equals("0")) {
                             recieverID = "0," + MyUuid;
                         } else {
                             try {
@@ -155,18 +155,44 @@ public class ChatActivity extends AppCompatActivity {
                     }
                     locationManager.requestLocationUpdates(
                             LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
-                    Location loc = new Location("gps");
-                    Log.d("Coordinates", loc.getLatitude() +" " + loc.getLongitude());
-                    String latitude = String.valueOf(loc.getLatitude());
-                    String longitude = String.valueOf(loc.getLatitude());
+                    Criteria criteria = new Criteria();
+                    criteria.setAccuracy(Criteria.ACCURACY_FINE);
 
-//                    String recieverID = String.join(",", notificationService.net.graph.get(chatId).Path);
-//                    notificationService.sendMessage("", recieverID, MyUuid, "GEO");
-                    Compass compass = new Compass();
-                    getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.CompassContainer, compass, null)
-                            .setReorderingAllowed(true)
-                            .commit();
+                    String best = locationManager.getBestProvider(criteria, true);
+                    // getLastKnownLocation so that user don't need to wait
+                    Location location = locationManager.getLastKnownLocation(best);
+                    Log.d("Coordinates", location.getLatitude() +" " + location.getLongitude());
+                    String latitude = String.valueOf(location.getLatitude());
+                    String longitude = String.valueOf(location.getLongitude());
+
+
+                    String recieverID = "";
+                    if(chatId.equals("0")){
+                        recieverID = "0," + MyUuid;
+                    } else {
+                        try {
+                            recieverID = String.join(",", notificationService.net.graph.get(chatId).Path);
+                        } catch (Exception e) {
+                            Toast toast = Toast.makeText(getApplicationContext(), "User off grid", Toast.LENGTH_LONG);
+                            toast.show();
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    try {
+                        notificationService.sendMessage(latitude + "\n" + longitude, recieverID, MyUuid, "GEO");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    viewModel.insert(new ChatMessage(latitude + "\n" + longitude,
+                            DataFormater.formater(System.currentTimeMillis() + ""),
+                            MyUuid, chatId, "GEO"));
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            viewModel.mutableLiveData = viewModel.getById(chatId, MyUuid);
+                        }
+                    }).start();
+                    Log.d("INSERT", "OBSERVE");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

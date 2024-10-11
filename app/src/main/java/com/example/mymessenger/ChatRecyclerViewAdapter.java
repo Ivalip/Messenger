@@ -1,8 +1,10 @@
 package com.example.mymessenger;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mymessenger.Database.Entity.ChatMessage;
@@ -29,6 +33,7 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     ViewModel viewModel = new ViewModel();
     private LayoutInflater mInflater;
     private List<ChatMessage> chatMessages = new ArrayList<>();
+    Activity activity;
 
     @Override
     public int getItemViewType (int position) {
@@ -52,10 +57,11 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     public ChatRecyclerViewAdapter(Context context, List<ChatMessage> messageList, ViewModel
-                                   viewModel) {
+                                   viewModel, Activity activity) {
         this.viewModel = viewModel;
         chatMessages = messageList;
         this.context = context;
+        this.activity = activity;
     }
     public void newAddedData(List <ChatMessage> messages){
         chatMessages = messages;
@@ -111,6 +117,13 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
                 viewHolder.content.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("DEST", viewHolder.content.getText().toString());
+                        Compass compass = new Compass();
+                        compass.setArguments(bundle);
+                        FragmentTransaction mFragmentTransaction = ((AppCompatActivity) ((NewViewHolder) holder).content.getContext()).getSupportFragmentManager().beginTransaction();
+                        mFragmentTransaction.replace(R.id.CompassContainer, compass);
+                        mFragmentTransaction.addToBackStack(null).commit();
                         //open nav tab
                     }
                 });
