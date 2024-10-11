@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,13 +10,28 @@
     android:paddingRight="16dp"
     android:paddingBottom="16dp"
     tools:context=".MainActivity">
-
     <ImageView
         android:id="@+id/compassImage"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
         android:scaleType="centerInside"
-        android:src="@drawable/compas" />
+        android:src="@drawable/compas" >
+    </ImageView>
+    <FrameLayout
+        android:id="@+id/arrow_box"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="230dp"
+            android:background="@drawable/arrow2"
+            android:elevation="70dp">
+        </ImageView>
+    </FrameLayout>
     <ImageButton
         android:background="@drawable/arrow_back"
         android:layout_width="50dp"
@@ -26,11 +41,11 @@
         android:id="@+id/coords"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="200dp"
+        android:layout_gravity="center_horizontal"
         android:layout_marginTop="600dp"
-        android:text="AAAAAAA"
+        android:text="0 КМ"
         android:elevation="50dp"
         android:textSize="20sp">
     </TextView>
 
-</RelativeLayout>
+</FrameLayout>

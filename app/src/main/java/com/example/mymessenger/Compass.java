@@ -1,7 +1,12 @@
 package com.example.mymessenger;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -23,8 +28,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -46,16 +55,30 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
-    private float[] lastAccelerometer = new float[3];
-    private float[] lastMagnetometer = new float[3];
+    private Sensor mRotationV;
+    private boolean isRotationSet = false;
     private boolean isAccelerometerSet = false;
     private boolean isMagnetometerSet = false;
+    private float[] rMat = new float[9];
+    private float[] orientation = new float[3];
+    private float[] lastAccelerometer = new float[3];
+    private float[] lastMagnetometer = new float[3];
+    private boolean lastRotationSet = false;
+    private boolean lastAccelerometerSet = false;
+    private boolean lastMagnetometerSet = false;
     private float currentDegree = 0f;
-    String latitude;
-    String longitude;
+    static double latitude;
+    static double longitude;
+    private double dlatitude;
+    private double dlongitude;
     LocationManager locationManager;
     LocationListener locationListener;
+    ImageView image;
+    FrameLayout arrow;
     TextView coords;
+    private int mAzimuth;
+    private int tAzimuth;
+    final float GEOKM = 86;
 
     public Compass() {
     }
@@ -104,18 +127,17 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         coords = view.findViewById(R.id.coords);
+        arrow = view.findViewById(R.id.arrow_box);
         String dest = getArguments().getString("DEST");
         Log.d("DEST", dest);
-        String destLongitude = dest.substring(0, dest.indexOf("\n"));
-        String destLatitude = dest.substring(dest.indexOf("\n")+1);
+        ArrayList<String> arrayList = new ArrayList<>(Arrays.asList(dest.split("\n")));
+        dlatitude = Double.parseDouble(arrayList.get(0));
+        dlongitude = Double.parseDouble(arrayList.get(1));
+        Log.d("DEST2", dlatitude + " " + dlongitude);
 
         locationManager = (LocationManager)
                 getContext().getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new MyLocationListener();
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-
-        String best = locationManager.getBestProvider(criteria, true);
+        LocationListener locationListener = new MyLocationListener();
         // getLastKnownLocation so that user don't need to wait
         if (ActivityCompat.checkSelfPermission(getContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(getContext(),
@@ -124,63 +146,93 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
                     android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 123);
             return;
         }
-        Location location = locationManager.getLastKnownLocation(best);
         locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+                LocationManager.GPS_PROVIDER, 1000, 10, this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
-        sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+        sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_GAME);
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+        //sensorManager.registerListener(this, mRotationV, SensorManager.SENSOR_ORIENTATION);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        sensorManager.unregisterListener(this);
+        sensorManager.unregisterListener(this, magnetometer);
+        sensorManager.unregisterListener(this, accelerometer);
+        //sensorManager.unregisterListener(this, mRotationV);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor == accelerometer) {
-            System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.length);
-            isAccelerometerSet = true;
-        } else if (event.sensor == magnetometer) {
-            System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.length);
-            isMagnetometerSet = true;
+        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+            SensorManager.getRotationMatrixFromVector(rMat, event.values);
+            mAzimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rMat, orientation)[0]) + 360) % 360;
         }
 
-        if (isAccelerometerSet && isMagnetometerSet) {
-            float[] rotationMatrix = new float[9];
-            boolean success = SensorManager.getRotationMatrix(rotationMatrix, null, lastAccelerometer, lastMagnetometer);
-            if (success) {
-                float[] orientation = new float[3];
-                SensorManager.getOrientation(rotationMatrix, orientation);
-                //Log.d("ORIENTATION", orientation+"");
-                float azimuthInRadians = orientation[0];
-                float azimuthInDegrees = (float) Math.toDegrees(azimuthInRadians);
-                rotateCompassImage(azimuthInDegrees);
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            System.arraycopy(event.values, 0, lastAccelerometer, 0, event.values.length);
+            lastAccelerometerSet = true;
+        } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            System.arraycopy(event.values, 0, lastMagnetometer, 0, event.values.length);
+            lastMagnetometerSet = true;
+        }
+        if (lastAccelerometerSet && lastMagnetometerSet) {
+            SensorManager.getRotationMatrix(rMat, null, lastAccelerometer, lastMagnetometer);
+            SensorManager.getOrientation(rMat, orientation);
+            mAzimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rMat, orientation)[0]) + 360) % 360;
+        }
+        mAzimuth = Math.round(mAzimuth);
+        compassImage.setRotation(-mAzimuth);
+        arrow.setRotation(-mAzimuth -tAzimuth);
+
+        //coords.setText(mAzimuth + "");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) == null) {
+            if ((sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) == null) || (sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) == null)) {
+                noSensorsAlert();
             }
+            else {
+                accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+                isAccelerometerSet = sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+                isMagnetometerSet = sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+            }
+        }
+        else{
+            mRotationV = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+            isRotationSet = sensorManager.registerListener(this, mRotationV, SensorManager.SENSOR_DELAY_UI);
         }
     }
 
-    private void rotateCompassImage(float degrees) {
-        RotateAnimation rotateAnimation = new RotateAnimation(
-                currentDegree,
-                -degrees,
-                Animation.RELATIVE_TO_SELF,
-                0.5f,
-                Animation.RELATIVE_TO_SELF,
-                0.5f
-        );
+    public void noSensorsAlert(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getContext());
+        alertDialog.setMessage("Your device doesn't support the Compass.")
+                .setCancelable(false)
+                .setNegativeButton("Close",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                       // finish();
+                    }
+                });
+        alertDialog.show();
+    }
 
-        rotateAnimation.setDuration(250);
-        rotateAnimation.setFillAfter(true);
-
-        compassImage.startAnimation(rotateAnimation);
-        currentDegree = -degrees;
+    public void stop() {
+        if(isAccelerometerSet && isMagnetometerSet){
+            sensorManager.unregisterListener(this,accelerometer);
+            sensorManager.unregisterListener(this,magnetometer);
+        }
+        else{
+            if(isRotationSet)
+                sensorManager.unregisterListener(this,mRotationV);
+        }
     }
 
     @Override
@@ -190,10 +242,16 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        latitude = String.valueOf(location.getLatitude());
-        longitude = String.valueOf(location.getLongitude());
-        Log.d("locChange", latitude + longitude);
-        coords.setText(latitude + "\n" + longitude);
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+        double dla = latitude - dlatitude;
+        double dlo = longitude - dlongitude;
+        double dSla = dla * 86;
+        double dSlo = dlo * 86;
+        double dS = Math.sqrt(dSla * dSla + dSlo * dSlo);
+        tAzimuth = (int)Math.round(Math.atan(dla/dlo));
+        coords.setText(dS+"");
+        Log.d("locChange", Math.atan(dlo/dla) + "");
     }
     @Override
     public void onProviderEnabled(@NonNull String provider) {

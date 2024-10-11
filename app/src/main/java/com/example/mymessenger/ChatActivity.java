@@ -142,7 +142,7 @@ public class ChatActivity extends AppCompatActivity {
         geo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
+                //try {
                     LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
                     LocationListener locationListener = new MyLocationListener();
 
@@ -153,8 +153,10 @@ public class ChatActivity extends AppCompatActivity {
                                 android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 123);
                         return;
                     }
-                    locationManager.requestLocationUpdates(
-                            LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+
+//                    Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+//                    Log.d("Coordinates", location.getLatitude() +" " + location.getLongitude());
+
                     Criteria criteria = new Criteria();
                     criteria.setAccuracy(Criteria.ACCURACY_FINE);
 
@@ -164,6 +166,18 @@ public class ChatActivity extends AppCompatActivity {
                     Log.d("Coordinates", location.getLatitude() +" " + location.getLongitude());
                     String latitude = String.valueOf(location.getLatitude());
                     String longitude = String.valueOf(location.getLongitude());
+
+//
+//
+//                    Criteria criteria = new Criteria();
+//                    criteria.setAccuracy(Criteria.ACCURACY_FINE);
+//
+//                    String best = locationManager.getBestProvider(criteria, true);
+//                    // getLastKnownLocation so that user don't need to wait
+//                    Location location = locationManager.getLastKnownLocation(best);
+//
+//                    String latitude = String.valueOf(location.getLatitude());
+//                    String longitude = String.valueOf(location.getLongitude());
 
 
                     String recieverID = "";
@@ -193,9 +207,9 @@ public class ChatActivity extends AppCompatActivity {
                         }
                     }).start();
                     Log.d("INSERT", "OBSERVE");
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+//                } catch (Exception e) {
+//                    throw new RuntimeException(e);
+//                }
             }
         });
     }

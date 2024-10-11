@@ -18,6 +18,8 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MessageHandler implements SerialInputOutputManager.Listener {
     Context context;
@@ -38,6 +40,7 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
     boolean senderIDRecieved = false;
     String text = "";
     boolean textRecieved = false;
+    boolean ChannelStatus = false;
     //Thread in = new Thread();
     int t1;
     int t2;
@@ -93,6 +96,12 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
             }
         };
         connected = true;
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() { // wait for furter nodes
+                ChannelStatus = false;
+            }
+        }, 0, 500);
         return true;
     }
 
@@ -102,7 +111,8 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
 //            AddMessage(new String(data));
 //        } else {
 //            in.start();
-            AddMessage(new String(data));
+        ChannelStatus = true;
+        AddMessage(new String(data));
 //        }
     }
 
@@ -196,6 +206,7 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
             textRecieved = false;
             time = "";
             timeRecieved = false;
+            ChannelStatus = false;
         }
         t1 = message.lastIndexOf("<");
         t2 = message.lastIndexOf(">");
@@ -221,17 +232,36 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
     public void SendMessage (String msg, String numberOfChat,
                               String MyUuid, String type) throws IOException {
         String time = System.currentTimeMillis() + "";
-        msg = "<TYPE>" + type + "|" + Hash(type) +
+        final String mesg = "<TYPE>" + type + "|" + Hash(type) +
                 "<ReceiverID>" + numberOfChat + "|" + Hash(numberOfChat) +
                 "<SenderID>" + MyUuid + "|" + Hash(MyUuid) +
                 "<START>" + msg + "|" + Hash(msg) +
                 "<TIME>" + time + "|" + Hash(time) + "<END>";
-        for (int i = 0; i < 3; i++) {
-            Log.d("MSGHANDKER", "Sending " + msg);
-            usbSerialPort.write(msg.getBytes(), 0);
-        }
-        Log.d("MSGHANDKER", "Sending ###");
-        usbSerialPort.write("###".getBytes(), 0);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    Log.d("CHANNELSTASTUS", ChannelStatus+"");
+                    if(!ChannelStatus){
+                        for (int i = 0; i < 3; i++) {
+                            Log.d("MSGHANDKER", "Sending " + mesg);
+                            try {
+                                usbSerialPort.write(mesg.getBytes(), 0);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        Log.d("MSGHANDKER", "Sending ###");
+                        try {
+                            usbSerialPort.write("###".getBytes(), 0);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                        break;
+                    }
+                }
+            }
+        }).start();
     }
 
     @Override
