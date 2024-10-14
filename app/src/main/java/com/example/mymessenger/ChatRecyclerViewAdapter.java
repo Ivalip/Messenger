@@ -65,7 +65,8 @@ public class ChatRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
     public void newAddedData(List <ChatMessage> messages){
         chatMessages = messages;
-        notifyDataSetChanged();
+        Log.d("MESGREDRAW", "");
+        this.notifyDataSetChanged();
     }
 
     @Override

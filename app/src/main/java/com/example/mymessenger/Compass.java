@@ -186,7 +186,7 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
             SensorManager.getOrientation(rMat, orientation);
             mAzimuth = (int) (Math.toDegrees(SensorManager.getOrientation(rMat, orientation)[0]) + 360) % 360;
         }
-        mAzimuth = Math.round(mAzimuth);
+        // mAzimuth = Math.round(mAzimuth);
         compassImage.setRotation(-mAzimuth);
         arrow.setRotation(-mAzimuth +tAzimuth);
 

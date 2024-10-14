@@ -15,6 +15,12 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,6 +47,7 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
     String text = "";
     boolean textRecieved = false;
     boolean ChannelStatus = false;
+    byte[] datas = new byte[2];
     //Thread in = new Thread();
     int t1;
     int t2;
@@ -48,6 +55,7 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
     int t4;
     int t5;
     int t6;
+    int num = 0;
 
     public MessageHandler(Context context, NotificationService service, UsbManager usbManager) {
         Log.d("Handler", "CREATED");
@@ -111,13 +119,30 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
 //            AddMessage(new String(data));
 //        } else {
 //            in.start();
+        //Log.d("MSG", data[0]+"");
+        if(data[0] < 0) {
+            //Log.d("MSG", data[0]+"");
+            byte [] dest = new byte[datas.length + 1];
+            System.arraycopy(datas, 0, dest, 0, datas.length);
+            dest[datas.length] = data[0];
+            datas = dest;
+            num = 1;
+        } else {
+            if(num == 1) {
+                Log.d("MSG", new String(datas, StandardCharsets.UTF_8));
+                AddMessage(new String(datas, StandardCharsets.UTF_8));
+                num = 0;
+                datas = new byte[0];
+            }
+            AddMessage(new String(data, StandardCharsets.UTF_8));
+        }
         ChannelStatus = true;
-        AddMessage(new String(data));
 //        }
     }
 
     public void AddMessage (String msg) {
         if (!msg.isEmpty()) {
+            //Log.d("MSG", message);
             //if(!((message.endsWith("<") && msg.equals("<")) || (message.endsWith(">")) && msg.equals(">"))) {
             message += msg;
             //}
@@ -241,19 +266,21 @@ public class MessageHandler implements SerialInputOutputManager.Listener {
             @Override
             public void run() {
                 while(true){
-                    Log.d("CHANNELSTASTUS", ChannelStatus+"");
+                    //Log.d("CHANNELSTASTUS", ChannelStatus+"");
                     if(!ChannelStatus){
                         for (int i = 0; i < 3; i++) {
-                            Log.d("MSGHANDKER", "Sending " + mesg);
+                            Log.d("MSGHANDLER", "Sending " + mesg);
+                            //byte[] bytes = msg.getBytes(StandardCharsets.UTF_8);
+                            //Log.d("MSGHANDLER", bytes[0]+"");
                             try {
-                                usbSerialPort.write(mesg.getBytes(), 0);
+                                usbSerialPort.write(mesg.getBytes(StandardCharsets.UTF_8), 0);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
                         }
                         Log.d("MSGHANDKER", "Sending ###");
                         try {
-                            usbSerialPort.write("###".getBytes(), 0);
+                            usbSerialPort.write("###".getBytes(StandardCharsets.UTF_8), 0);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
