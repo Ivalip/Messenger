@@ -146,6 +146,7 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
                     android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 123);
             return;
         }
+        Log.d("COMPAS", "manager set");
         locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER, 1000, 10, this);
     }
@@ -187,7 +188,7 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
         }
         mAzimuth = Math.round(mAzimuth);
         compassImage.setRotation(-mAzimuth);
-        arrow.setRotation(-mAzimuth -tAzimuth);
+        arrow.setRotation(-mAzimuth +tAzimuth);
 
         //coords.setText(mAzimuth + "");
     }
@@ -244,14 +245,23 @@ public class Compass extends Fragment implements SensorEventListener, LocationLi
     public void onLocationChanged(@NonNull Location location) {
         latitude = location.getLatitude();
         longitude = location.getLongitude();
-        double dla = latitude - dlatitude;
-        double dlo = longitude - dlongitude;
-        double dSla = dla * 86;
-        double dSlo = dlo * 86;
+        Log.d("NEWLOC", "LAT: " + latitude + "\nLON: " + longitude);
+        double dla = dlatitude - latitude;
+        double dlo = dlongitude - longitude;
+        double dSla = dla * 92;
+        double dSlo = dlo * 92;
         double dS = Math.sqrt(dSla * dSla + dSlo * dSlo);
-        tAzimuth = (int)Math.round(Math.atan(dla/dlo));
-        coords.setText(dS+"");
-        Log.d("locChange", Math.atan(dlo/dla) + "");
+        if (dla > 0 && dlo > 0) {
+            tAzimuth = (int)(Math.atan(Math.abs(dlo/dla)) * 180 / Math.PI);
+        } else if (dla < 0 && dlo > 0) {
+            tAzimuth = (int)(Math.atan(Math.abs(dla/dlo)) * 180 / Math.PI) + 90;
+        } else if (dla < 0 && dlo < 0) {
+            tAzimuth = (int)(Math.atan(Math.abs(dlo/dla)) * 180 / Math.PI) + 180;
+        } else if (dla > 0 && dlo < 0) {
+            tAzimuth = (int)(Math.atan(Math.abs(dla/dlo)) * 180 / Math.PI) + 270;
+        }
+        coords.setText(String.format("%.3f Км", dS));
+        Log.d("locChange", "dlo: " + dlo + "| dla: " + dla + "\ntAzimuth: " + tAzimuth);
     }
     @Override
     public void onProviderEnabled(@NonNull String provider) {
